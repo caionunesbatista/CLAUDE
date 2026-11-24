@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+/* ───────── Fontes auto-hospedadas (sem requisição a terceiros) ───────── */
+@font-face {
+  font-family: 'Archivo';
+  font-style: italic;
+  font-weight: 400 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(/fonts/archivo-italic-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: italic;
+  font-weight: 400 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(/fonts/archivo-italic-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(/fonts/archivo-normal-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(/fonts/archivo-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url(/fonts/inter-normal-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url(/fonts/inter-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  TOKENS DA MARCA — cores extraídas do banner original do KM Lavacar
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Archivo', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Azul da marca (o "M" do logo: #00a9fe) */
+  --color-brand-50: #ecf8ff;
+  --color-brand-100: #d4efff;
+  --color-brand-200: #b0e3ff;
+  --color-brand-300: #78d3ff;
+  --color-brand-400: #38bcff;
+  --color-brand-500: #00a9fe;
+  --color-brand-600: #0086db;
+  --color-brand-700: #006bb1;
+  --color-brand-800: #065a92;
+  --color-brand-900: #0b4a78;
+
+  /* Azul profundo do botão original (#0047ca) */
+  --color-royal-400: #4d8bff;
+  --color-royal-500: #1a6bf5;
+  --color-royal-600: #0047ca;
+  --color-royal-700: #0b38a0;
+  --color-royal-800: #0d2f78;
+
+  /* Escala escura do fundo (o banner é praticamente #02060c) */
+  --color-ink-50: #eef2f7;
+  --color-ink-300: #93a4bb;
+  --color-ink-400: #6b7f99;
+  --color-ink-500: #4a5c76;
+  --color-ink-600: #2f3e55;
+  --color-ink-700: #1d2a3d;
+  --color-ink-800: #121d2e;
+  --color-ink-850: #0c1522;
+  --color-ink-900: #070e18;
+  --color-ink-950: #02060c;
+
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.5rem;
+
+  --shadow-glow: 0 0 40px -8px rgb(0 169 254 / 0.45);
+  --shadow-glow-lg: 0 0 90px -20px rgb(0 169 254 / 0.55);
+  --shadow-card: 0 24px 60px -30px rgb(0 0 0 / 0.9);
+
+  --animate-flutuar: flutuar 7s ease-in-out infinite;
+  --animate-brilho: brilho 3.2s ease-in-out infinite;
+}
+
+@keyframes flutuar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes brilho {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  BASE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Compensa o cabeçalho fixo ao navegar pelas âncoras */
+    scroll-padding-top: 5.5rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-ink-50);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  /* Foco visível e consistente em todo o site (acessibilidade) */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Combina o calendário/relógio nativos com o tema escuro */
+  input[type='date'],
+  input[type='time'] { color-scheme: dark; }
+
+  input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.6);
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  input[type='date']::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+  ::selection {
+    background: var(--color-brand-500);
+    color: var(--color-ink-950);
+  }
+
+  /* Barra de rolagem discreta (navegadores WebKit) */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--color-ink-950); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-700);
+    border-radius: 999px;
+    border: 2px solid var(--color-ink-950);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-ink-600); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  UTILITÁRIOS DA MARCA
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@utility texto-degrade {
+  background-image: linear-gradient(100deg, var(--color-brand-300), var(--color-brand-500) 45%, var(--color-royal-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility vidro {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgb(255 255 255 / 0.09);
+}
+
+
+@utility quebra-nenhuma {
+  overflow-wrap: anywhere;
+}
+
+/* Respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  CAMADAS DO HERÓI
+ *  Celular/tablet: texto → faixa de detalhes → veículos, empilhados no fluxo.
+ *  Desktop: as imagens viram camadas absolutas — faixa de detalhes no topo
+ *  direito e veículos embaixo, sangrando até a borda da janela, exatamente
+ *  como na composição do banner original.
+ *
+ *  A largura é `min(teto, distância até a borda)`: em telas comuns a imagem
+ *  vai até onde o texto termina; em monitores muito largos ela para de
+ *  crescer, para que as duas camadas nunca se encontrem no meio.
+ *  (`50vw + N%` é a distância da borda esquerda da camada até a da janela,
+ *   já que as porcentagens aqui se referem ao container centralizado.)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  @media (min-width: 1024px) {
+    .hero-camada {
+      position: absolute;
+      right: calc(50% - 50vw); /* sai do container e encosta na borda da janela */
+      z-index: 0;
+    }
+    .hero-detalhes {
+      top: 0;
+      width: min(48rem, calc(50vw + 4%)); /* alinha com left: 46% */
+    }
+    .hero-veiculos {
+      bottom: 0;
+      width: min(52rem, calc(50vw + 3%)); /* alinha com left: 47% */
+    }
+  }
+}

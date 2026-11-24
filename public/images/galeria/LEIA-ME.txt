@@ -1,0 +1,19 @@
+Coloque aqui as fotos da seção "Antes & Depois".
+
+Sugestão de nomes (combinando com src/config/site.js):
+
+  1-antes.jpg   1-depois.jpg
+  2-antes.jpg   2-depois.jpg
+  3-antes.jpg   3-depois.jpg
+  4-antes.jpg   4-depois.jpg
+
+Depois, informe o caminho de cada uma em src/config/site.js, na lista
+"galeria". Exemplo:
+
+  antes:  '/images/galeria/1-antes.jpg',
+  depois: '/images/galeria/1-depois.jpg',
+
+Dicas:
+- Use a mesma moldura nas duas fotos (mesmo ângulo e distância).
+- Proporção 4:3 é a ideal; outras são recortadas.
+- 1200 a 1600 px de largura já é suficiente.

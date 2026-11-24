@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#02060c" />
+
+    <title>KM Lavacar — Cuidado completo para o seu veículo</title>
+    <meta
+      name="description"
+      content="Lavagem, higienização, polimento e vitrificação para carros e motos. Agende seu horário em poucos cliques e confirme direto pelo WhatsApp."
+    />
+
+    <!-- Compartilhamento em redes sociais -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="KM Lavacar — Cuidado completo para o seu veículo" />
+    <meta
+      property="og:description"
+      content="Lavagem, higienização, polimento e muito mais, com qualidade e atenção em cada detalhe."
+    />
+    <meta property="og:image" content="/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- As fontes são locais: pré-carregamos as usadas acima da dobra -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-italic-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-normal-latin.woff2" crossorigin />
+    <!-- A imagem principal do herói começa a baixar junto com o HTML -->
+    <link rel="preload" as="image" href="/images/veiculos-tall.webp" type="image/webp" media="(max-width: 1023px)" />
+    <link rel="preload" as="image" href="/images/veiculos-wide.webp" type="image/webp" media="(min-width: 1024px)" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <div style="padding:2rem;font-family:sans-serif;color:#eef2f7;background:#02060c">
+        Este site precisa de JavaScript para funcionar. Se preferir, fale com a gente
+        diretamente pelo WhatsApp.
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
