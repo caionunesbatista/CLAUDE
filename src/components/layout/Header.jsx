@@ -17,7 +17,7 @@ export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false)
   const semMovimento = useReducedMotion()
 
-  /* Fundo de vidro aparece assim que a página sai do topo. */
+  /* O fundo do cabeçalho aparece assim que a página sai do topo. */
   useEffect(() => {
     const aoRolar = () => setRolou(window.scrollY > 24)
     aoRolar()
@@ -127,7 +127,7 @@ export default function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-3 top-21 z-88 overflow-hidden rounded-3xl border border-white/10
+              className="fixed inset-x-3 top-21 z-88 overflow-hidden rounded-2xl border border-white/10
                          bg-ink-900/95 p-3 shadow-card backdrop-blur-xl lg:hidden"
             >
               <ul className="flex flex-col">

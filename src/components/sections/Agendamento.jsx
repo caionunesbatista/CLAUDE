@@ -23,7 +23,7 @@ const OPCOES_SERVICO = servicos.map((s) => ({
 function AvisoConfiguracao() {
   return (
     <Reveal className="mb-10">
-      <div className="flex items-start gap-3.5 rounded-3xl border border-amber-400/30 bg-amber-400/8 p-5 sm:p-6">
+      <div className="flex items-start gap-3.5 rounded-2xl border border-amber-400/30 bg-amber-400/8 p-5 sm:p-6">
         <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-400" aria-hidden="true" />
         <div className="text-sm leading-relaxed text-amber-100/90">
           <p className="font-semibold text-amber-200">Falta configurar o WhatsApp</p>
@@ -53,7 +53,7 @@ function MinhasReservas() {
 
   return (
     <Reveal className="mt-14">
-      <div className="rounded-4xl border border-white/10 bg-ink-900/60 p-6 sm:p-8">
+      <div className="rounded-2xl border border-white/10 bg-ink-900/60 p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="flex items-center gap-2.5 font-display text-lg font-bold text-white">
             <CalendarCheck2 className="size-5 text-brand-400" aria-hidden="true" />
@@ -141,9 +141,8 @@ export default function Agendamento() {
     <Secao id="agendamento" className="scroll-mt-24">
       <TituloSecao
         etiqueta="Agendamento"
-        titulo="Marque seu"
-        destaque="horário"
-        texto="Preencha os dados, confira o resumo e envie — a conversa abre no WhatsApp já com tudo escrito. Leva menos de um minuto."
+        titulo="Marque seu horário"
+        texto="Preencha os dados e confira o resumo. Ao enviar, a conversa abre no WhatsApp com a mensagem já escrita."
       />
 
       <div className="mt-14">
@@ -152,7 +151,7 @@ export default function Agendamento() {
         <form onSubmit={aoEnviar} noValidate className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           {/* ───────────────── FORMULÁRIO ───────────────── */}
           <Reveal className="lg:col-span-7">
-            <div className="rounded-4xl border border-white/10 bg-ink-900/50 p-6 sm:p-8">
+            <div className="rounded-2xl border border-white/10 bg-ink-900/50 p-6 sm:p-8">
               {/* Progresso */}
               <div className="mb-8">
                 <div className="flex items-center justify-between text-xs">
@@ -281,10 +280,9 @@ export default function Agendamento() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-linear-to-r
-                             from-[#25D366] to-[#128C7E] font-display text-base font-bold uppercase italic
-                             tracking-wide text-white shadow-[0_12px_44px_-14px_rgba(37,211,102,0.85)]
-                             transition-shadow hover:shadow-[0_16px_54px_-12px_rgba(37,211,102,1)]"
+                  className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#25D366]
+                             font-display text-base font-bold uppercase tracking-wide text-[#04240f]
+                             transition-colors duration-200 hover:bg-[#2ee874]"
                 >
                   <MessageCircle className="size-5" aria-hidden="true" />
                   Agendar pelo WhatsApp

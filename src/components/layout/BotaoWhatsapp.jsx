@@ -48,7 +48,7 @@ export default function BotaoWhatsapp() {
           whileTap={{ scale: 0.94 }}
           transition={{ type: 'spring', stiffness: 400, damping: 24 }}
           className="group fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-80 flex size-14
-                     items-center justify-center rounded-full bg-linear-to-br from-[#25D366] to-[#128C7E]
+                     items-center justify-center rounded-full bg-[#25D366]
                      shadow-[0_12px_38px_-10px_rgba(37,211,102,0.9)] sm:size-16"
         >
           {/* Pulso suave ao redor */}
@@ -56,7 +56,7 @@ export default function BotaoWhatsapp() {
             aria-hidden="true"
             className="absolute inset-0 animate-ping rounded-full bg-[#25D366]/35 [animation-duration:2.6s]"
           />
-          <MessageCircle className="relative size-7 text-white sm:size-8" aria-hidden="true" />
+          <MessageCircle className="relative size-7 text-[#04240f] sm:size-8" aria-hidden="true" />
           <span
             className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-xl
                        bg-ink-900 px-3.5 py-2 text-sm font-medium text-white opacity-0 shadow-card

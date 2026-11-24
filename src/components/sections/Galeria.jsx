@@ -12,10 +12,9 @@ export default function Galeria() {
   return (
     <Secao id="galeria" className="bg-ink-900/30">
       <TituloSecao
-        etiqueta="Resultado real"
-        titulo="Antes &"
-        destaque="depois"
-        texto="Arraste a divisória de cada foto para ver a diferença. Sem filtro, sem retoque — só produto certo, técnica e paciência."
+        etiqueta="Galeria"
+        titulo="Antes e depois"
+        texto="Arraste a divisória de cada foto para comparar. As imagens são dos serviços feitos aqui, sem edição."
       />
 
       <RevealLista as="ul" className="mt-14 grid gap-6 sm:grid-cols-2 lg:gap-8" intervalo={0.12}>

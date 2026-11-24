@@ -117,7 +117,7 @@ export default function AntesDepois({ item }) {
   const temFotos = Boolean(item.antes && item.depois)
 
   return (
-    <figure className="group relative overflow-hidden rounded-3xl border border-white/10 bg-ink-900 shadow-card">
+    <figure className="group relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card">
       {temFotos ? <Comparador item={item} /> : <CartaoReservado item={item} />}
 
       <figcaption className="border-t border-white/5 p-5">

@@ -37,7 +37,7 @@ export default function Toast() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className={`pointer-events-auto relative w-full max-w-md rounded-3xl border p-4 pr-11
+            className={`pointer-events-auto relative w-full max-w-md rounded-2xl border p-4 pr-11
                         backdrop-blur-xl sm:p-5 sm:pr-12 ${aparencia.borda} ${aparencia.brilho}`}
             style={{ backgroundColor: 'rgb(9 16 27 / 0.97)' }}
           >
@@ -51,7 +51,7 @@ export default function Toast() {
                     href={toast.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-105"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-[#04240f] transition-colors hover:bg-[#2ee874]"
                   >
                     Abrir conversa no WhatsApp
                     <ExternalLink className="size-4" aria-hidden="true" />

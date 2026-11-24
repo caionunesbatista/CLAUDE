@@ -1,34 +1,26 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { CalendarCheck, ChevronRight, Sparkles, Bike, Clock, ShieldCheck } from 'lucide-react'
+import { CalendarCheck, ChevronRight, Sparkles } from 'lucide-react'
 import Botao from '../ui/Botao'
 import ImagemArte from '../ui/ImagemArte'
 import { empresa } from '../../config/site'
 import { LOGO, HERO_DETALHES, HERO_VEICULOS } from '../../config/imagens'
 
-const SELOS = [
-  { Icone: Bike, texto: 'Carros e motos' },
-  { Icone: Clock, texto: 'Hora marcada' },
-  { Icone: ShieldCheck, texto: 'Produtos profissionais' },
-]
-
-/** Fundo: brilhos azuis e as faixas diagonais do banner original. */
+/**
+ * Fundo do herói.
+ *
+ * Um brilho azul atrás dos veículos e as duas diagonais da arte original.
+ * Nada de véu claro por cima: o preto é o fundo, e o azul entra só como luz.
+ */
 function FundoHero() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* Brilho azul principal, atrás do texto */}
-      <div className="absolute -left-40 top-0 size-[38rem] rounded-full bg-royal-600/18 blur-[120px]" />
-      {/* Brilho ciano à direita, acompanhando os veículos */}
-      <div className="absolute -right-32 top-1/3 size-[34rem] rounded-full bg-brand-500/14 blur-[130px]" />
-      {/* Reflexo frio no rodapé, como o piso molhado da arte */}
-      <div className="absolute inset-x-0 bottom-0 h-72 bg-linear-to-t from-brand-900/22 to-transparent" />
+      {/* Luz fria atrás dos veículos, como no piso molhado da arte */}
+      <div className="absolute -right-24 top-1/3 size-[32rem] rounded-full bg-brand-600/12 blur-[140px]" />
+      <div className="absolute -left-32 top-8 size-[26rem] rounded-full bg-royal-700/12 blur-[130px]" />
 
-      {/* Faixas diagonais de luz */}
-      <div className="absolute -left-10 -top-10 h-[130%] w-px rotate-[18deg] bg-linear-to-b from-transparent via-brand-400/55 to-transparent" />
-      <div className="absolute left-16 -top-10 h-[130%] w-px rotate-[18deg] bg-linear-to-b from-transparent via-royal-500/35 to-transparent" />
-      <div className="absolute right-1/4 -top-10 hidden h-[130%] w-px rotate-[18deg] bg-linear-to-b from-transparent via-brand-500/30 to-transparent lg:block" />
-
-      {/* Vinheta para o conteúdo respirar */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--color-ink-950)_100%)]" />
+      {/* Diagonais de luz da identidade */}
+      <div className="absolute -left-6 -top-10 h-[130%] w-px rotate-[18deg] bg-linear-to-b from-transparent via-brand-400/45 to-transparent" />
+      <div className="absolute left-20 -top-10 h-[130%] w-px rotate-[18deg] bg-linear-to-b from-transparent via-royal-500/25 to-transparent" />
     </div>
   )
 }
@@ -87,7 +79,7 @@ export default function Hero() {
 
             <motion.p
               variants={item}
-              className="mt-7 max-w-lg border-l-0 text-base leading-relaxed text-ink-300 sm:text-lg lg:border-l-[3px] lg:border-brand-500 lg:pl-5"
+              className="mt-6 max-w-md text-base leading-relaxed text-ink-300 sm:text-lg"
             >
               {empresa.descricao}
             </motion.p>
@@ -110,17 +102,6 @@ export default function Hero() {
               </Botao>
             </motion.div>
 
-            <motion.ul
-              variants={item}
-              className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 lg:justify-start"
-            >
-              {SELOS.map(({ Icone, texto }) => (
-                <li key={texto} className="flex items-center gap-2 text-sm text-ink-400">
-                  <Icone className="size-4 text-brand-400" aria-hidden="true" />
-                  {texto}
-                </li>
-              ))}
-            </motion.ul>
           </motion.div>
 
           {/* ──────────── FAIXA DE DETALHES ──────────── */}

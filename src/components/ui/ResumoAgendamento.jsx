@@ -48,7 +48,7 @@ export default function ResumoAgendamento({ form, children }) {
   const precoSobConsulta = servico && servico.preco == null
 
   return (
-    <div className="overflow-hidden rounded-4xl border border-white/10 bg-linear-to-b from-ink-850 to-ink-900 shadow-card">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-linear-to-b from-ink-850 to-ink-900 shadow-card">
       <header className="border-b border-white/8 bg-white/[0.03] px-6 py-5">
         <h3 className="font-display text-lg font-bold uppercase italic tracking-wide text-white">
           Resumo do pedido
@@ -70,7 +70,7 @@ export default function ResumoAgendamento({ form, children }) {
       </ul>
 
       {/* Valor estimado */}
-      <div className="mx-6 my-5 rounded-3xl border border-brand-500/25 bg-linear-to-br from-brand-500/12 to-royal-600/10 p-5">
+      <div className="mx-6 my-5 rounded-2xl border border-brand-500/25 bg-linear-to-br from-brand-500/12 to-royal-600/10 p-5">
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.16em] text-brand-300/80">Valor estimado</p>

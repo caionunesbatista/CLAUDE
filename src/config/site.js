@@ -12,39 +12,33 @@ export const empresa = {
   descricao:
     'Lavagem, higienização, polimento e muito mais, com qualidade e atenção em cada detalhe.',
 
-  /* ⚠️ OBRIGATÓRIO — TROQUE PELO NÚMERO REAL DO PROPRIETÁRIO.
-   * Formato internacional, somente dígitos: 55 (Brasil) + DDD + número.
-   * Exemplo: (11) 98765-4321  ->  '5511987654321'                            */
-  whatsapp: '5500000000000',
+  /* Formato internacional, somente dígitos: 55 + DDD + número. */
+  whatsapp: '5515997363807',
 
-  /* Telefone exibido no rodapé (pode ser o mesmo do WhatsApp) */
   telefone: {
-    exibicao: '(00) 00000-0000',
-    link: '+5500000000000',
+    exibicao: '(15) 99736-3807',
+    link: '+5515997363807',
   },
 
-  email: 'contato@kmlavacar.com.br',
-
   instagram: {
-    usuario: '@kmlavacar',
-    url: 'https://instagram.com/kmlavacar',
+    usuario: '@km_lavacar_',
+    url: 'https://www.instagram.com/km_lavacar_',
   },
 
   endereco: {
-    rua: 'Av. Exemplo, 1234',
-    complemento: 'Box 02 — ao lado do posto',
-    bairroCidade: 'Centro, Sua Cidade — UF',
-    cep: '00000-000',
-    /* Link do Google Maps. Para gerar o seu: abra o Google Maps, busque o
-     * endereço, clique em "Compartilhar" e cole o link aqui.                 */
-    mapsUrl:
-      'https://www.google.com/maps/search/?api=1&query=Av.+Exemplo+1234+Centro',
+    /* ⚠️ Falta a rua e o número. Acrescente em `linha1` quando quiser;
+     * o link do mapa abaixo já leva ao ponto exato.                        */
+    linha1: 'Jardim Brasil',
+    linha2: 'Buri — SP',
+    cep: '18290-000',
+    mapsUrl: 'https://maps.app.goo.gl/MLbHbE7ep4Uo6uG38',
   },
 
+  /* ⚠️ Confirme os horários reais antes de publicar. */
   horarioFuncionamento: [
-    { dias: 'Segunda a Sexta', horas: '08:00 — 18:00' },
-    { dias: 'Sábado', horas: '08:00 — 16:00' },
-    { dias: 'Domingo e feriados', horas: 'Fechado' },
+    { dias: 'Segunda a sexta', horas: '08:00 às 18:00' },
+    { dias: 'Sábado', horas: '08:00 às 16:00' },
+    { dias: 'Domingo', horas: 'Fechado' },
   ],
 }
 
@@ -73,8 +67,8 @@ export const servicos = [
     preco: 50,
     duracao: '≈ 40 min',
     icone: 'droplets',
-    descricao: 'O básico bem feito: externa caprichada e secagem sem marcas.',
-    inclui: ['Lavagem externa', 'Rodas e pneus', 'Secagem com toalha de microfibra'],
+    descricao: 'Externa completa, rodas e secagem sem deixar marca.',
+    inclui: ['Lavagem externa', 'Rodas e pneus', 'Secagem em microfibra'],
   },
   {
     id: 'completa',
@@ -83,7 +77,7 @@ export const servicos = [
     duracao: '≈ 1h30',
     icone: 'sparkles',
     destaque: true,
-    descricao: 'Externa e interna com acabamento de detalhe em cada canto.',
+    descricao: 'Externa, interna e acabamento feito com pincel nos cantos.',
     inclui: [
       'Tudo da lavagem simples',
       'Aspiração completa',
@@ -98,7 +92,7 @@ export const servicos = [
     preco: 220,
     duracao: '≈ 3h',
     icone: 'spray',
-    descricao: 'Limpeza profunda de bancos, carpetes e ar-condicionado.',
+    descricao: 'Extração de bancos e carpetes, mais higienização do ar-condicionado.',
     inclui: [
       'Extração de bancos e carpetes',
       'Higienização do ar-condicionado',
@@ -112,12 +106,12 @@ export const servicos = [
     preco: 400,
     duracao: '≈ 5h',
     icone: 'gem',
-    descricao: 'Correção de riscos finos e brilho profundo que dura meses.',
+    descricao: 'Remove riscos finos da pintura e aplica proteção que dura meses.',
     inclui: [
       'Descontaminação da pintura',
       'Polimento técnico',
       'Proteção / vitrificação',
-      'Revitalização de plásticos externos',
+      'Plásticos externos revitalizados',
     ],
   },
   {
@@ -126,8 +120,8 @@ export const servicos = [
     preco: null, // sob consulta
     duracao: 'A combinar',
     icone: 'wrench',
-    descricao: 'Motor, cristalização de vidros, enceramento, higienização de bagageiro.',
-    inclui: ['Orçamento personalizado', 'Combinamos tudo pelo WhatsApp'],
+    descricao: 'Motor, cristalização de vidros, enceramento e bagageiro.',
+    inclui: ['Orçamento combinado pelo WhatsApp'],
   },
 ]
 
@@ -161,29 +155,29 @@ export const galeria = [
   {
     id: 2,
     titulo: 'Polimento de pintura',
-    legenda: 'Correção de micro-riscos e brilho profundo',
+    legenda: 'Correção de micro-riscos na pintura',
     antes: null,
     depois: null,
   },
   {
     id: 3,
     titulo: 'Rodas e caixas de roda',
-    legenda: 'Remoção de pó de pastilha e sujeira pesada',
+    legenda: 'Pó de pastilha e sujeira acumulada',
     antes: null,
     depois: null,
   },
   {
     id: 4,
     titulo: 'Painel e console',
-    legenda: 'Detalhamento com pincel em cada entrada de ar',
+    legenda: 'Entradas de ar e frisos feitos com pincel',
     antes: null,
     depois: null,
   },
 ]
 
 export const diferenciais = [
-  { icone: 'shieldCheck', titulo: 'Produtos profissionais', texto: 'Linha automotiva com pH neutro, seguro para pintura e plásticos.' },
-  { icone: 'clock', titulo: 'Hora marcada', texto: 'Você agenda, chega e é atendido. Sem fila, sem espera.' },
-  { icone: 'handHeart', titulo: 'Atenção ao detalhe', texto: 'Pincel, microfibra e paciência onde a máquina não alcança.' },
-  { icone: 'bike', titulo: 'Carros e motos', texto: 'Atendimento para os dois, com produtos e técnica específicos.' },
+  { icone: 'shieldCheck', titulo: 'Produtos de pH neutro', texto: 'Linha automotiva profissional, segura para pintura e plásticos.' },
+  { icone: 'clock', titulo: 'Hora marcada', texto: 'Você agenda, chega e é atendido. Sem fila.' },
+  { icone: 'handHeart', titulo: 'Acabamento com pincel', texto: 'Grades, botões e frisos onde a máquina não alcança.' },
+  { icone: 'bike', titulo: 'Carros e motos', texto: 'Produto e técnica específicos para cada um.' },
 ]

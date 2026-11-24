@@ -3,10 +3,9 @@ import { motion, useReducedMotion } from 'framer-motion'
 const ESTILOS = {
   primario:
     'bg-linear-to-r from-brand-500 via-royal-500 to-royal-600 text-white shadow-[0_10px_40px_-12px_rgba(0,122,255,0.8)] hover:shadow-[0_14px_50px_-10px_rgba(0,150,255,0.95)]',
-  whatsapp:
-    'bg-linear-to-r from-[#25D366] to-[#128C7E] text-white shadow-[0_10px_40px_-12px_rgba(37,211,102,0.75)] hover:shadow-[0_14px_50px_-10px_rgba(37,211,102,0.9)]',
+  whatsapp: 'bg-[#25D366] text-[#04240f] hover:bg-[#2ee874]',
   contorno:
-    'vidro text-ink-50 hover:border-brand-400/60 hover:bg-white/10',
+    'border border-white/15 bg-white/[0.04] text-ink-50 hover:border-brand-400/70 hover:bg-white/[0.08]',
   fantasma: 'text-ink-300 hover:text-white hover:bg-white/5',
 }
 
