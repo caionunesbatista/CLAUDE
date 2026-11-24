@@ -179,7 +179,7 @@ export const galeria = [
 ]
 
 export const diferenciais = [
-  { icone: 'shieldCheck', titulo: 'Produtos de pH neutro', texto: 'Linha automotiva profissional, segura para pintura e plásticos.' },
+  { icone: 'shieldCheck', titulo: 'Linha Vonixx', texto: 'Produtos profissionais de estética automotiva, seguros para pintura e plásticos.' },
   { icone: 'clock', titulo: 'Hora marcada', texto: 'Você agenda, chega e é atendido. Sem fila.' },
   { icone: 'handHeart', titulo: 'Acabamento com pincel', texto: 'Grades, botões e frisos onde a máquina não alcança.' },
   { icone: 'bike', titulo: 'Carros e motos', texto: 'Produto e técnica específicos para cada um.' },

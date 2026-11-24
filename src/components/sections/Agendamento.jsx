@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, AlertTriangle, Trash2, CalendarCheck2, RotateCcw } from 'lucide-react'
 import Secao, { TituloSecao } from '../ui/Secao'
 import Reveal from '../ui/Reveal'
-import { CampoTexto, CampoSelecao, CampoTextoLongo } from '../ui/Campo'
+import { CampoTexto, CampoData, CampoSelecao, CampoTextoLongo } from '../ui/Campo'
 import SeletorHorario from '../ui/SeletorHorario'
 import ResumoAgendamento from '../ui/ResumoAgendamento'
 import { servicos, tiposVeiculo } from '../../config/site'
@@ -232,8 +232,7 @@ export default function Agendamento() {
                 <legend className="mb-5 font-display text-sm font-bold uppercase tracking-[0.16em] text-brand-300">
                   Data e horário
                 </legend>
-                <CampoTexto
-                  type="date"
+                <CampoData
                   rotulo="Data preferencial"
                   min={dataMinima()}
                   max={dataMaxima()}

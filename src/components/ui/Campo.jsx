@@ -1,6 +1,6 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, ChevronDown } from 'lucide-react'
+import { AlertCircle, ChevronDown, CalendarDays } from 'lucide-react'
 
 const BASE =
   'w-full rounded-2xl border bg-ink-900/70 px-4 text-[0.95rem] text-white placeholder:text-ink-500 ' +
@@ -62,6 +62,56 @@ export function CampoTexto({ rotulo, erro, dica, obrigatorio = true, className =
         aria-describedby={erro ? idErro : undefined}
         {...props}
       />
+      {!erro && dica && <p className="mt-2 text-xs text-ink-500">{dica}</p>}
+      <Erro id={idErro} mensagem={erro} />
+    </div>
+  )
+}
+
+/**
+ * Campo de data.
+ *
+ * Um <input type="date"> vazio não desenha nada em vários navegadores (o
+ * Safari do iPhone entre eles): fica uma caixa vazia e ninguém percebe que é
+ * para tocar. Enquanto está vazio e sem foco, escondemos o texto nativo e
+ * mostramos "Escolha sua data" por cima. Ao receber foco, o controle nativo
+ * reaparece, para não atrapalhar quem digita a data pelo teclado.
+ */
+export function CampoData({ rotulo, erro, dica, className = '', value, onBlur, ...props }) {
+  const id = useId()
+  const idErro = `${id}-erro`
+  const [focado, setFocado] = useState(false)
+  const vazio = !value && !focado
+
+  return (
+    <div className={className}>
+      <Rotulo htmlFor={id} obrigatorio>{rotulo}</Rotulo>
+      <div className="relative">
+        <input
+          id={id}
+          type="date"
+          value={value}
+          onFocus={() => setFocado(true)}
+          onBlur={(e) => {
+            setFocado(false)
+            onBlur?.(e)
+          }}
+          className={classes(!!erro)}
+          /* Estilo inline de propósito: a classe base já define a cor do
+             texto, e duas utilidades do mesmo nível deixariam o resultado
+             na mão da ordem do CSS gerado. */
+          style={vazio ? { color: 'transparent' } : undefined}
+          aria-invalid={!!erro}
+          aria-describedby={erro ? idErro : undefined}
+          {...props}
+        />
+        {vazio && (
+          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center gap-2.5 text-[0.95rem] text-ink-500">
+            <CalendarDays className="size-4 text-brand-400" aria-hidden="true" />
+            Escolha sua data
+          </span>
+        )}
+      </div>
       {!erro && dica && <p className="mt-2 text-xs text-ink-500">{dica}</p>}
       <Erro id={idErro} mensagem={erro} />
     </div>
