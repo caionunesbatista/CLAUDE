@@ -3,6 +3,7 @@ import { CalendarCheck, ChevronRight, Sparkles, Bike, Clock, ShieldCheck } from 
 import Botao from '../ui/Botao'
 import ImagemArte from '../ui/ImagemArte'
 import { empresa } from '../../config/site'
+import { LOGO, HERO_DETALHES, HERO_VEICULOS } from '../../config/imagens'
 
 const SELOS = [
   { Icone: Bike, texto: 'Carros e motos' },
@@ -61,10 +62,10 @@ export default function Hero() {
           >
             <motion.img
               variants={item}
-              src="/images/logo.png"
+              src={LOGO.src}
               alt={`${empresa.nome} — logotipo`}
-              width={512}
-              height={217}
+              width={LOGO.largura}
+              height={LOGO.altura}
               fetchPriority="high"
               className="h-20 w-auto drop-shadow-[0_8px_30px_rgba(0,169,254,0.35)] sm:h-24 lg:h-28"
             />
@@ -129,15 +130,7 @@ export default function Hero() {
             transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="hero-camada hero-detalhes relative mt-12 lg:absolute lg:mt-0"
           >
-            <ImagemArte
-              nomeWide="detalhes-wide"
-              nomeTall="detalhes-tall"
-              larguraTall={941}
-              alturaTall={395}
-              prioridade
-              alt="Detalhamento automotivo: aplicação de higienizador no interior, pincel nos botões da porta e escova com espuma na roda."
-              className="h-auto w-full"
-            />
+            <ImagemArte fonte={HERO_DETALHES} prioridade className="h-auto w-full" />
           </motion.div>
 
           {/* ─────────────── VEÍCULOS ─────────────── */}
@@ -147,15 +140,7 @@ export default function Hero() {
             transition={{ duration: 1.05, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="hero-camada hero-veiculos relative -mt-6 lg:absolute lg:mt-0"
           >
-            <ImagemArte
-              nomeWide="veiculos-wide"
-              nomeTall="veiculos-tall"
-              larguraTall={941}
-              alturaTall={396}
-              prioridade
-              alt="Volkswagen Polo branco e moto esportiva recém-lavados, refletidos no piso molhado."
-              className="h-auto w-full"
-            />
+            <ImagemArte fonte={HERO_VEICULOS} prioridade className="h-auto w-full" />
           </motion.div>
         </div>
       </div>

@@ -2,29 +2,29 @@
  * Imagem com direção de arte: um recorte para telas largas e outro para
  * telas estreitas, sempre servindo WebP com JPEG de reserva.
  *
- * As dimensões reais são informadas para o navegador reservar o espaço
- * (zero deslocamento de layout / CLS).
+ * As dimensões são informadas para o navegador reservar o espaço antes do
+ * download — zero deslocamento de layout (CLS).
+ *
+ * @param {object} fonte  um dos objetos de src/config/imagens.js
  */
 export default function ImagemArte({
-  nomeWide,
-  nomeTall,
-  larguraTall,
-  alturaTall,
-  alt,
+  fonte,
   className = '',
   prioridade = false,
   pontoDeTroca = '1024px',
 }) {
+  const { wide, tall, largura, altura, alt } = fonte
+
   return (
     <picture>
-      <source media={`(min-width: ${pontoDeTroca})`} type="image/webp" srcSet={`/images/${nomeWide}.webp`} />
-      <source media={`(min-width: ${pontoDeTroca})`} type="image/jpeg" srcSet={`/images/${nomeWide}.jpg`} />
-      <source type="image/webp" srcSet={`/images/${nomeTall}.webp`} />
+      <source media={`(min-width: ${pontoDeTroca})`} type="image/webp" srcSet={wide.webp} />
+      <source media={`(min-width: ${pontoDeTroca})`} type="image/jpeg" srcSet={wide.jpg} />
+      <source type="image/webp" srcSet={tall.webp} />
       <img
-        src={`/images/${nomeTall}.jpg`}
+        src={tall.jpg}
         alt={alt}
-        width={larguraTall}
-        height={alturaTall}
+        width={largura}
+        height={altura}
         className={className}
         loading={prioridade ? 'eager' : 'lazy'}
         fetchPriority={prioridade ? 'high' : 'auto'}

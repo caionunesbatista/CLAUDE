@@ -115,6 +115,12 @@
  *  BASE
  * ═══════════════════════════════════════════════════════════════════════════ */
 @layer base {
+  :root {
+    /* O site tem um visual escuro assumido: controles nativos, barras de
+     * rolagem e seletores de data seguem esse tema.                        */
+    color-scheme: dark;
+  }
+
   html {
     scroll-behavior: smooth;
     /* Compensa o cabeçalho fixo ao navegar pelas âncoras */
@@ -146,10 +152,6 @@
     outline-offset: 3px;
     border-radius: 6px;
   }
-
-  /* Combina o calendário/relógio nativos com o tema escuro */
-  input[type='date'],
-  input[type='time'] { color-scheme: dark; }
 
   input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(1.6);

@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Menu, X, CalendarCheck } from 'lucide-react'
 import Botao from '../ui/Botao'
 import { empresa } from '../../config/site'
+import { LOGO } from '../../config/imagens'
 
 const LINKS = [
   { href: '#servicos', texto: 'Serviços' },
@@ -66,10 +67,10 @@ export default function Header() {
             aria-label={`${empresa.nome} — início`}
           >
             <img
-              src="/images/logo.png"
+              src={LOGO.src}
               alt={empresa.nome}
-              width={512}
-              height={217}
+              width={LOGO.largura}
+              height={LOGO.altura}
               className="h-9 w-auto sm:h-10"
             />
           </a>

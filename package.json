@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:unico": "UNICO=1 vite build && node scripts/gerar-html-unico.mjs"
   },
   "dependencies": {
     "framer-motion": "^14.14.0",

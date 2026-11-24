@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+/* UNICO=1 gera um bundle só, usado pelo script de arquivo único. */
+const arquivoUnico = process.env.UNICO === '1'
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: { host: true, port: 5173 },
@@ -9,7 +12,7 @@ export default defineConfig({
     target: 'es2020',
     cssCodeSplit: false,
     rollupOptions: {
-      output: {
+      output: arquivoUnico ? { codeSplitting: false } : {
         /* Separa as bibliotecas do código do site para melhorar o cache */
         codeSplitting: {
           groups: [

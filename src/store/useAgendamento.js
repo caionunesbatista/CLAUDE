@@ -1,8 +1,25 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { diaAberto, dataMinima, dataMaxima, horariosDoDia } from '../lib/agenda.js'
 import { calcularPreco } from '../lib/precos.js'
 import { montarLinkWhatsapp } from '../lib/whatsapp.js'
+
+/**
+ * Armazenamento tolerante a falhas. Em aba anônima, com dados do site
+ * bloqueados ou dentro de um frame restrito, o acesso ao localStorage pode
+ * lançar erro — aqui ele apenas não guarda nada, e o site segue funcionando.
+ */
+const armazenamentoSeguro = {
+  getItem: (chave) => {
+    try { return localStorage.getItem(chave) } catch { return null }
+  },
+  setItem: (chave, valor) => {
+    try { localStorage.setItem(chave, valor) } catch { /* ignora */ }
+  },
+  removeItem: (chave) => {
+    try { localStorage.removeItem(chave) } catch { /* ignora */ }
+  },
+}
 
 const FORM_VAZIO = {
   nome: '',
@@ -94,29 +111,31 @@ export const useAgendamento = create(
       horariosReservadosEm: (data) =>
         get().reservas.filter((r) => r.data === data).map((r) => r.horario),
 
+      /** Link do WhatsApp para o estado atual do formulário. */
+      linkAtual: () => montarLinkWhatsapp(get().form),
+
       /**
-       * Abre o WhatsApp com a mensagem pronta e marca o horário como reservado
-       * na interface. A janela é aberta de forma síncrona, antes de qualquer
-       * `await`, para que o navegador não bloqueie o pop-up.
+       * Valida e, se estiver tudo certo, registra o horário e mostra a
+       * confirmação. Devolve `true` quando a navegação pode seguir.
+       *
+       * Quem abre o WhatsApp é um <a href target="_blank"> de verdade, e não
+       * window.open: links funcionam em qualquer contexto, inclusive quando a
+       * página está dentro de um frame que bloqueia pop-ups abertos por script.
        */
-      enviar: () => {
+      confirmar: () => {
         if (!get().validarTudo()) {
-          set({ toast: { tipo: 'erro', titulo: 'Faltam alguns dados', texto: 'Confira os campos destacados em vermelho.' } })
-          return { ok: false }
+          set({
+            toast: {
+              tipo: 'erro',
+              titulo: 'Faltam alguns dados',
+              texto: 'Confira os campos destacados em vermelho.',
+            },
+          })
+          return false
         }
 
         const form = { ...get().form }
-        const link = montarLinkWhatsapp(form)
-
-        /* Atenção: passar 'noopener' aqui faria o window.open devolver null
-         * mesmo quando a aba abre — e aí nunca saberíamos se o navegador
-         * bloqueou. Abrimos sem a flag e cortamos a referência em seguida,
-         * que tem o mesmo efeito de segurança.                              */
-        const janela = window.open(link, '_blank')
-        if (janela) janela.opener = null
-
         set((s) => ({
-          enviando: false,
           reservas: [
             ...s.reservas,
             {
@@ -131,12 +150,14 @@ export const useAgendamento = create(
               criadoEm: new Date().toISOString(),
             },
           ],
-          toast: janela
-            ? { tipo: 'sucesso', titulo: 'WhatsApp aberto!', texto: 'É só tocar em enviar na conversa para confirmar seu horário.' }
-            : { tipo: 'aviso', titulo: 'Libere o pop-up', texto: 'Seu navegador bloqueou a nova aba. Use o botão abaixo para abrir a conversa.', link },
+          toast: {
+            tipo: 'sucesso',
+            titulo: 'Pedido montado!',
+            texto: 'A conversa do WhatsApp abre em outra aba com a mensagem pronta — é só tocar em enviar. Se não abrir, use o botão abaixo.',
+            link: montarLinkWhatsapp(form),
+          },
         }))
-
-        return { ok: true, link }
+        return true
       },
 
       limparFormulario: () => set({ form: { ...FORM_VAZIO }, erros: {}, tocados: {} }),
@@ -148,6 +169,7 @@ export const useAgendamento = create(
     }),
     {
       name: 'km-lavacar:agenda-demo',
+      storage: createJSONStorage(() => armazenamentoSeguro),
       /* Só as reservas são lembradas entre visitas — o formulário sempre começa limpo. */
       partialize: (s) => ({ reservas: s.reservas }),
       version: 1,

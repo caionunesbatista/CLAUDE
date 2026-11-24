@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, AlertTriangle, Trash2, CalendarCheck2, RotateCcw } from 'lucide-react'
 import Secao, { TituloSecao } from '../ui/Secao'
@@ -9,7 +10,7 @@ import { servicos, tiposVeiculo } from '../../config/site'
 import { dataMinima, dataMaxima } from '../../lib/agenda'
 import { formatarPreco, formatarDataCurta } from '../../lib/formatadores'
 import { buscarServico } from '../../lib/precos'
-import { whatsappConfigurado } from '../../lib/whatsapp'
+import { whatsappConfigurado, montarLinkWhatsapp } from '../../lib/whatsapp'
 import { useAgendamento, CAMPOS_OBRIGATORIOS } from '../../store/useAgendamento'
 
 const OPCOES_VEICULO = tiposVeiculo.map((v) => ({ valor: v.id, texto: v.nome }))
@@ -111,8 +112,9 @@ export default function Agendamento() {
   const tocados = useAgendamento((s) => s.tocados)
   const setCampo = useAgendamento((s) => s.setCampo)
   const tocar = useAgendamento((s) => s.tocar)
-  const enviar = useAgendamento((s) => s.enviar)
+  const confirmar = useAgendamento((s) => s.confirmar)
   const limpar = useAgendamento((s) => s.limparFormulario)
+  const ancora = useRef(null)
 
   /* Só mostramos o erro depois que o cliente interagiu com o campo. */
   const erroDe = (campo) => (tocados[campo] ? erros[campo] : undefined)
@@ -122,9 +124,10 @@ export default function Agendamento() {
   const progresso = Math.round((preenchidos / total) * 100)
   const completo = preenchidos === total && Object.keys(erros).length === 0
 
+  /* Enter dentro do formulário aciona o mesmo link do botão. */
   const aoEnviar = (e) => {
     e.preventDefault()
-    enviar()
+    ancora.current?.click()
   }
 
   const campo = (nome) => ({
@@ -265,8 +268,16 @@ export default function Agendamento() {
           <Reveal delay={0.12} className="lg:col-span-5">
             <div className="lg:sticky lg:top-24">
               <ResumoAgendamento form={form}>
-                <motion.button
-                  type="submit"
+                {/* Link de verdade, não window.open: abre em qualquer
+                    contexto e ainda permite abrir em nova aba pelo menu. */}
+                <motion.a
+                  ref={ancora}
+                  href={montarLinkWhatsapp(form)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!confirmar()) e.preventDefault()
+                  }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -277,7 +288,7 @@ export default function Agendamento() {
                 >
                   <MessageCircle className="size-5" aria-hidden="true" />
                   Agendar pelo WhatsApp
-                </motion.button>
+                </motion.a>
 
                 <p className="mt-3.5 text-center text-xs leading-relaxed text-ink-500">
                   {completo

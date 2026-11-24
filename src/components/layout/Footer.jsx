@@ -1,6 +1,7 @@
 import { MapPin, MessageCircle, ArrowUp } from 'lucide-react'
 import { Instagram } from '../ui/IconesMarca'
 import { empresa } from '../../config/site'
+import { LOGO } from '../../config/imagens'
 import { linkWhatsappSimples } from '../../lib/whatsapp'
 
 const ANO = new Date().getFullYear()
@@ -18,10 +19,10 @@ export default function Footer() {
         <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:justify-between lg:text-left">
           <div className="flex flex-col items-center gap-4 lg:items-start">
             <img
-              src="/images/logo.png"
+              src={LOGO.src}
               alt={empresa.nome}
-              width={512}
-              height={217}
+              width={LOGO.largura}
+              height={LOGO.altura}
               loading="lazy"
               className="h-11 w-auto"
             />
