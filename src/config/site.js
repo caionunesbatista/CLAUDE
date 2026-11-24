@@ -128,14 +128,17 @@ export const servicos = [
 /* ───────────────────────────────────────────────────────────────────────────
  *  TIPOS DE VEÍCULO
  *  `fator` multiplica o preço base do serviço. 1 = preço cheio.
+ *  `sobConsulta: true` faz o site mostrar "Sob consulta" em vez de um valor:
+ *  é o que usamos onde o preço depende do tamanho do veículo e precisa ser
+ *  combinado na conversa. Para fixar um valor, troque `sobConsulta` por um
+ *  `fator` (ex.: `fator: 2.5` cobra duas vezes e meia o preço do carro).
  * ─────────────────────────────────────────────────────────────────────────── */
 export const tiposVeiculo = [
-  { id: 'hatch', nome: 'Hatch / Compacto', fator: 1 },
-  { id: 'sedan', nome: 'Sedan', fator: 1.1 },
-  { id: 'suv', nome: 'SUV', fator: 1.25 },
-  { id: 'picape', nome: 'Picape', fator: 1.35 },
+  { id: 'carro', nome: 'Carro', fator: 1 },
   { id: 'moto', nome: 'Moto', fator: 0.6 },
-  { id: 'outros', nome: 'Outros', fator: 1 },
+  { id: 'onibus', nome: 'Ônibus', sobConsulta: true },
+  { id: 'caminhao', nome: 'Caminhão', sobConsulta: true },
+  { id: 'outros', nome: 'Outros', sobConsulta: true },
 ]
 
 /* ───────────────────────────────────────────────────────────────────────────

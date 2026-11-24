@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { User, Car, Sparkles, CalendarDays, Clock, Info } from 'lucide-react'
-import { buscarServico, buscarVeiculo, calcularPreco } from '../../lib/precos'
+import { buscarServico, buscarVeiculo, situacaoPreco } from '../../lib/precos'
 import { formatarPreco, formatarDataExtenso } from '../../lib/formatadores'
 
 const VAZIO = '—'
@@ -40,12 +40,10 @@ function Linha({ Icone, rotulo, valor, preenchido }) {
 export default function ResumoAgendamento({ form, children }) {
   const servico = buscarServico(form.servico)
   const veiculo = buscarVeiculo(form.tipoVeiculo)
-  const preco = calcularPreco(form.servico, form.tipoVeiculo)
+  const preco = situacaoPreco(form.servico, form.tipoVeiculo)
   const nome = `${form.nome} ${form.sobrenome}`.trim()
 
   const veiculoTexto = [veiculo?.nome, form.modelo.trim()].filter(Boolean).join(' — ')
-  const precoDefinido = preco != null
-  const precoSobConsulta = servico && servico.preco == null
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-linear-to-b from-ink-850 to-ink-900 shadow-card">
@@ -76,14 +74,18 @@ export default function ResumoAgendamento({ form, children }) {
             <p className="text-[0.7rem] uppercase tracking-[0.16em] text-brand-300/80">Valor estimado</p>
             <AnimatePresence mode="wait" initial={false}>
               <motion.p
-                key={String(preco) + String(precoSobConsulta)}
+                key={preco.estado + String(preco.valor)}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.22 }}
                 className="mt-1 font-display text-3xl font-extrabold text-white sm:text-4xl"
               >
-                {precoDefinido ? formatarPreco(preco) : precoSobConsulta ? 'Sob consulta' : VAZIO}
+                {preco.estado === 'ok'
+                  ? formatarPreco(preco.valor)
+                  : preco.estado === 'consulta'
+                    ? 'Sob consulta'
+                    : VAZIO}
               </motion.p>
             </AnimatePresence>
           </div>
@@ -94,12 +96,12 @@ export default function ResumoAgendamento({ form, children }) {
           )}
         </div>
 
-        {(precoDefinido || precoSobConsulta) && (
+        {preco.estado !== 'incompleto' && (
           <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-ink-400">
             <Info className="mt-px size-3.5 shrink-0" aria-hidden="true" />
-            {precoSobConsulta
-              ? 'Combinamos o valor pelo WhatsApp, de acordo com o que o seu veículo precisa.'
-              : 'Estimativa com base no porte do veículo. O valor final é confirmado na conversa, após vermos o estado do carro.'}
+            {preco.estado === 'consulta'
+              ? 'Para esse porte de veículo o valor é combinado na conversa. É só enviar que respondemos com o orçamento.'
+              : 'Estimativa com base no porte do veículo. O valor final é confirmado na conversa, depois de vermos o estado dele.'}
           </p>
         )}
       </div>

@@ -9,15 +9,20 @@ import ResumoAgendamento from '../ui/ResumoAgendamento'
 import { servicos, tiposVeiculo } from '../../config/site'
 import { dataMinima, dataMaxima } from '../../lib/agenda'
 import { formatarPreco, formatarDataCurta } from '../../lib/formatadores'
-import { buscarServico } from '../../lib/precos'
+import { buscarServico, precoAPartirDe } from '../../lib/precos'
 import { whatsappConfigurado, montarLinkWhatsapp } from '../../lib/whatsapp'
 import { useAgendamento, CAMPOS_OBRIGATORIOS } from '../../store/useAgendamento'
 
 const OPCOES_VEICULO = tiposVeiculo.map((v) => ({ valor: v.id, texto: v.nome }))
-const OPCOES_SERVICO = servicos.map((s) => ({
-  valor: s.id,
-  texto: s.preco == null ? `${s.nome} — sob consulta` : `${s.nome} — a partir de ${formatarPreco(s.preco)}`,
-}))
+/* O "a partir de" aqui tem que bater com o da tabela de serviços: parte do
+ * menor porte com preço de tabela, não do preço base.                      */
+const OPCOES_SERVICO = servicos.map((s) => {
+  const base = precoAPartirDe(s)
+  return {
+    valor: s.id,
+    texto: base == null ? `${s.nome} — sob consulta` : `${s.nome} — a partir de ${formatarPreco(base)}`,
+  }
+})
 
 /** Aviso que aparece só enquanto o número do WhatsApp não foi configurado. */
 function AvisoConfiguracao() {
@@ -274,6 +279,7 @@ export default function Agendamento() {
                   href={montarLinkWhatsapp(form)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Agendar pelo WhatsApp"
                   onClick={(e) => {
                     if (!confirmar()) e.preventDefault()
                   }}
@@ -285,7 +291,7 @@ export default function Agendamento() {
                              transition-colors duration-200 hover:bg-[#2ee874]"
                 >
                   <MessageCircle className="size-5" aria-hidden="true" />
-                  Agendar pelo WhatsApp
+                  Agendar
                 </motion.a>
 
                 <p className="mt-3.5 text-center text-xs leading-relaxed text-ink-500">
