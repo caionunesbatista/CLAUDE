@@ -1,0 +1,6 @@
+Coloque aqui as fotos dos produtos, se preferir hospedar as imagens no seu site.
+
+Depois use o caminho no campo "imagem" de js/produtos.js, por exemplo:
+  imagem: 'img/produtos/air-fryer.webp',
+
+Dicas: foto quadrada, fundo branco, entre 500 e 800 px de largura.
