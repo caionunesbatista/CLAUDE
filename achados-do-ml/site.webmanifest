@@ -1,0 +1,14 @@
+{
+  "name": "Achados do ML",
+  "short_name": "Achados do ML",
+  "description": "As melhores ofertas do Mercado Livre em um só lugar.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00287d",
+  "icons": [
+    { "src": "img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "img/icone-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

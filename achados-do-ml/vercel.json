@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    { "src": "/js/dados\\.js", "dest": "/api/dados" },
+    { "src": "/(README\\.md|package\\.json|package-lock\\.json|vercel\\.json)", "status": 404, "dest": "/404.html" }
+  ],
+  "functions": {
+    "api/*.js": { "includeFiles": "js/dados.js", "maxDuration": 15 }
+  }
+}

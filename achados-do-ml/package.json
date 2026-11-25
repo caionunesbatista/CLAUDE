@@ -1,0 +1,11 @@
+{
+  "name": "achados-do-ml",
+  "private": true,
+  "type": "module",
+  "description": "Site Achados do ML com painel do proprietário (Vercel)",
+  "engines": { "node": "22.x" },
+  "dependencies": {
+    "@vercel/blob": "^2.9.0",
+    "@vercel/functions": "^3.11.3"
+  }
+}

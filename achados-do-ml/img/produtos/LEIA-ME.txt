@@ -1,0 +1,4 @@
+As fotos de produto enviadas pelo painel (painel.html → Produtos → Enviar foto)
+ficam guardadas nesta pasta.
+
+Você não precisa mexer aqui: o painel reduz, converte para WebP e envia sozinho.
