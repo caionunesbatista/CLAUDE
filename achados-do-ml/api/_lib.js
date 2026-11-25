@@ -12,8 +12,14 @@ import { get, put } from '@vercel/blob';
 
 const scrypt = promisify(scryptCb);
 
-export const CAMINHO_CONTA = 'privado/conta.json';
-export const CAMINHO_DADOS = 'privado/dados.json';
+// Versões de teste (preview) usam uma pasta separada do armazenamento,
+// para nunca mexer na conta nem nos dados do site no ar.
+export const PREFIXO = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production'
+  ? `teste-${process.env.VERCEL_ENV}/` : '';
+export const CAMINHO_CONTA = PREFIXO + 'privado/conta.json';
+export const CAMINHO_DADOS = PREFIXO + 'privado/dados.json';
+export const PASTA_BACKUPS = PREFIXO + 'privado/backups/';
+export const PASTA_IMAGENS = PREFIXO + 'imagens/';
 export const COOKIE = 'achados_sessao';
 const DURACAO_SESSAO = 7 * 24 * 60 * 60; // 7 dias, em segundos
 

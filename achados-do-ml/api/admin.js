@@ -12,7 +12,7 @@ import { randomBytes } from 'node:crypto';
 import { put } from '@vercel/blob';
 import { dangerouslyDeleteByTag } from '@vercel/functions';
 import {
-  CAMINHO_DADOS, apagarSessao, bloqueado, criarSessao, dadosAtuais, emailValido, erro, esperar,
+  CAMINHO_DADOS, PASTA_BACKUPS, PASTA_IMAGENS, apagarSessao, bloqueado, criarSessao, dadosAtuais, emailValido, erro, esperar,
   gerarHashSenha, gravarJson, iguais, ipDe, json, lerConta, limparErros, normalizarEmail,
   registrarErro, salvarConta, senhaConfere, senhaForte, sessaoValida
 } from './_lib.js';
@@ -133,7 +133,7 @@ export default {
         }
         // Cópia de segurança (uma por publicação, com data no nome)
         const carimbo = new Date().toISOString().replace(/[:.]/g, '-');
-        await gravarJson(`privado/backups/${carimbo}.json`, corpo.dados, { allowOverwrite: false }).catch(() => {});
+        await gravarJson(`${PASTA_BACKUPS}${carimbo}.json`, corpo.dados, { allowOverwrite: false }).catch(() => {});
         // Atualiza o site na hora: apaga o cache dos dados na CDN
         await dangerouslyDeleteByTag('dados').catch(() => {});
         return json({ ok: true, versao: r.etag || null, publicadoEm: new Date().toISOString() });
@@ -146,7 +146,7 @@ export default {
         if (!m) return erro('Envie uma imagem WebP, PNG ou JPG.');
         const bytes = Buffer.from(m[2], 'base64');
         if (!bytes.length || bytes.length > LIMITE_IMAGEM) return erro('Imagem grande demais (máximo 3 MB).', 413);
-        const caminho = `imagens/${slug(corpo.nome)}-${randomBytes(5).toString('hex')}.${TIPOS[m[1]]}`;
+        const caminho = `${PASTA_IMAGENS}${slug(corpo.nome)}-${randomBytes(5).toString('hex')}.${TIPOS[m[1]]}`;
         await put(caminho, bytes, {
           access: 'private', addRandomSuffix: false, allowOverwrite: false,
           contentType: m[1], cacheControlMaxAge: 31536000

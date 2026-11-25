@@ -17,9 +17,11 @@ proprietário** (link discreto no rodapé), com e-mail e senha, sem mexer em có
 
 ## 1. Onde o site está
 
+**Endereço:** <https://achadosdoml.vercel.app>
+
 O site roda na **Vercel** (projeto `achados-do-ml`), ligado a este repositório
-do GitHub, pasta `achados-do-ml`. Cada alteração de código enviada para a
-branch de produção publica o site de novo sozinha.
+do GitHub, pasta `achados-do-ml`. As versões de teste (preview) usam uma pasta
+separada do armazenamento (`teste-preview/`), então nunca mexem no site no ar.
 
 O que você edita pelo painel (textos, produtos, imagens) **não depende do
 GitHub**: fica guardado no armazenamento da Vercel (Vercel Blob privado) e

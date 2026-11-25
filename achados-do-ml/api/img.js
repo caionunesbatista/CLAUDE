@@ -8,7 +8,7 @@ import { get } from '@vercel/blob';
 export default {
   async fetch(request) {
     const p = new URL(request.url).searchParams.get('p') || '';
-    if (!/^imagens\/[a-z0-9-]{1,80}\.(webp|png|jpg)$/.test(p)) return new Response('Não encontrado', { status: 404 });
+    if (!/^(?:teste-[a-z]+\/)?imagens\/[a-z0-9-]{1,80}\.(webp|png|jpg)$/.test(p)) return new Response('Não encontrado', { status: 404 });
     try {
       const r = await get(p, { access: 'private' });
       if (!r || r.statusCode !== 200) {
