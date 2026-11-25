@@ -1,6 +1,4 @@
-Coloque aqui as fotos dos produtos, se preferir hospedar as imagens no seu site.
+As fotos de produto enviadas pelo painel (painel.html → Produtos → Enviar foto)
+ficam guardadas nesta pasta.
 
-Depois use o caminho no campo "imagem" de js/produtos.js, por exemplo:
-  imagem: 'img/produtos/air-fryer.webp',
-
-Dicas: foto quadrada, fundo branco, entre 500 e 800 px de largura.
+Você não precisa mexer aqui: o painel reduz, converte para WebP e envia sozinho.

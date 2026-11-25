@@ -24,17 +24,15 @@
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
-  <!-- Fontes locais e imagem principal começam a baixar junto com a página -->
+  <!-- Fontes locais começam a baixar junto com a página -->
   <link rel="preload" href="fontes/fredoka.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fontes/nunito.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" as="image" type="image/webp" media="(min-width: 1024px)"
-        imagesrcset="img/hero/hero-produtos-desktop-800.webp 800w, img/hero/hero-produtos-desktop-1200.webp 1200w, img/hero/hero-produtos-desktop-1496.webp 1496w"
-        imagesizes="(min-width: 1600px) 760px, 47.5vw">
-  <link rel="preload" as="image" type="image/webp" media="(max-width: 1023.98px)"
-        imagesrcset="img/hero/hero-produtos-mobile-600.webp 600w, img/hero/hero-produtos-mobile-940.webp 940w, img/hero/hero-produtos-mobile-1262.webp 1262w"
-        imagesizes="(min-width: 643px) 540px, 84vw">
 
   <link rel="stylesheet" href="css/estilo.css">
+
+  <!-- Dados do site (editados pelo painel) e preparo do topo -->
+  <script src="js/dados.js"></script>
+  <script src="js/base.js"></script>
 </head>
 <body>
   <!-- Ícones (desenhados uma vez e reaproveitados em todo o site) -->
@@ -140,6 +138,11 @@
   </svg>
 
   <a class="pular" href="#ofertas">Pular para as ofertas</a>
+
+  <div class="faixa-previa" id="faixa-previa" hidden>
+    <strong>Prévia:</strong> você está vendo alterações que ainda não foram publicadas.
+    <a href="painel.html">Voltar ao painel</a>
+  </div>
 
   <!-- ============================== TOPO ============================== -->
   <header class="topo" id="topo">
@@ -257,14 +260,8 @@
           <svg class="hero__raios hero__raios--esq" aria-hidden="true"><use href="#d-raios"/></svg>
           <svg class="hero__raios hero__raios--dir" aria-hidden="true"><use href="#d-raios"/></svg>
           <picture>
-            <source media="(min-width: 1024px)" type="image/webp" width="1496" height="1264"
-                    srcset="img/hero/hero-produtos-desktop-800.webp 800w, img/hero/hero-produtos-desktop-1200.webp 1200w, img/hero/hero-produtos-desktop-1496.webp 1496w"
-                    sizes="(min-width: 1600px) 760px, 47.5vw">
-            <source media="(min-width: 1024px)" width="1496" height="1264" srcset="img/hero/hero-produtos-desktop-800.png">
-            <source type="image/webp" width="1262" height="922"
-                    srcset="img/hero/hero-produtos-mobile-600.webp 600w, img/hero/hero-produtos-mobile-940.webp 940w, img/hero/hero-produtos-mobile-1262.webp 1262w"
-                    sizes="(min-width: 643px) 540px, 84vw">
-            <img class="hero__img" src="img/hero/hero-produtos-mobile-600.png" width="1262" height="922"
+            <source class="hero__fonte-pc" media="(min-width: 1024px)" type="image/webp">
+            <img class="hero__img" width="1262" height="922"
                  alt="Air fryer, liquidificador, smartphone, fone de ouvido, tênis e uma caixa do Mercado Livre saindo de um papel rasgado"
                  fetchpriority="high" decoding="async">
           </picture>
@@ -284,6 +281,7 @@
         <path d="M0 6Q200 66 400 6V60H0Z" fill="currentColor"/>
       </svg>
     </section>
+    <script>window.AchadosHero && window.AchadosHero();</script>
 
     <!-- ============================ CATEGORIAS ============================ -->
     <section class="categorias" aria-label="Categorias">
@@ -328,6 +326,7 @@
               <span class="ordenar__caixa">
                 <select id="ordem">
                   <option value="relevancia">Mais relevantes</option>
+                  <option value="mais-vendidos">Mais vendidos</option>
                   <option value="menor-preco">Menor preço</option>
                   <option value="maior-preco">Maior preço</option>
                   <option value="desconto">Maior desconto</option>
@@ -461,8 +460,6 @@
     <p class="sem-js">Para ver as ofertas, ative o JavaScript do seu navegador.</p>
   </noscript>
 
-  <script src="js/config.js"></script>
-  <script src="js/produtos.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#00287d">
+  <title>Painel — Achados do ML</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/painel.css">
+  <!-- Dados publicados (usados no modo sem conexão) -->
+  <script src="js/dados.js"></script>
+</head>
+<body class="painel">
+  <!-- Ícones (mesmos do site) -->
+  <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g-amarelo" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe866"/>
+        <stop offset=".55" stop-color="#ffd21a"/>
+        <stop offset="1" stop-color="#f7b500"/>
+      </linearGradient>
+    </defs>
+    <!-- ícones: Lucide (ISC) + próprios -->
+    <symbol id="i-busca" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol>
+    <symbol id="i-fechar" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-seta-baixo" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-seta-esq" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-link-externo" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-seta-direita" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-seta-cima" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-caminhao" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+    <symbol id="i-aperto" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></symbol>
+    <symbol id="i-celular" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol>
+    <symbol id="i-notebook" viewBox="0 0 24 24"><path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z"/><path d="M20.054 15.987H3.946"/></symbol>
+    <symbol id="i-fone" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+    <symbol id="i-controle" viewBox="0 0 24 24"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></symbol>
+    <symbol id="i-casa" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-liquidificador" viewBox="0 0 24 24"><path d="M8 14a2 2 0 0 0-1.963 1.615l-1.018 5.193A1 1 0 0 0 6 22h12a1 1 0 0 0 .981-1.192l-1.018-5.193A2 2 0 0 0 16 14z"/><path d="m17 2-1 12"/><path d="M8.006 14 7 2"/><path d="M7.565 8.787A5 5 0 0 0 12 8a5 5 0 0 1 4.56-.75"/><path d="M19 2H5a2 2 0 0 0-2 2v5a2 2 0 0 0 .688 1.5"/><path d="M12 18h.01"/></symbol>
+    <symbol id="i-haltere" viewBox="0 0 24 24"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/></symbol>
+    <symbol id="i-camiseta" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></symbol>
+    <symbol id="i-estrela" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+    <symbol id="i-brilho" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></symbol>
+    <symbol id="i-bebe" viewBox="0 0 24 24"><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M15 12h.01"/><path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/><path d="M9 12h.01"/></symbol>
+    <symbol id="i-pet" viewBox="0 0 24 24"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></symbol>
+    <symbol id="i-ferramenta" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></symbol>
+    <symbol id="i-carro" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></symbol>
+    <symbol id="i-livro" viewBox="0 0 24 24"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></symbol>
+    <symbol id="i-relogio" viewBox="0 0 24 24"><path d="M12 10v2.2l1.6 1"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/><circle cx="12" cy="12" r="6"/></symbol>
+    <symbol id="i-presente" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><rect x="3" y="7" width="18" height="4" rx="1"/></symbol>
+    <symbol id="i-geladeira" viewBox="0 0 24 24"><path d="M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6Z"/><path d="M5 10h14"/><path d="M15 7v6"/></symbol>
+    <symbol id="i-tv" viewBox="0 0 24 24"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-sofa" viewBox="0 0 24 24"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M4 18v2"/><path d="M20 18v2"/><path d="M12 4v9"/></symbol>
+    <symbol id="i-bicicleta" viewBox="0 0 24 24"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></symbol>
+    <symbol id="i-saude" viewBox="0 0 24 24"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/><path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></symbol>
+    <symbol id="i-brinquedo" viewBox="0 0 24 24"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></symbol>
+    <symbol id="i-filtro" viewBox="0 0 24 24"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-cadeado" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-pacote" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></symbol>
+    <symbol id="i-clique" viewBox="0 0 24 24"><path d="M14 4.1 12 6"/><path d="m5.1 8-2.9-.8"/><path d="m6 12-1.9 2"/><path d="M7.2 2.2 8 5.1"/><path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/></symbol>
+    <symbol id="i-sacola" viewBox="0 0 24 24"><path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/></symbol>
+    <symbol id="i-relogio-tempo" viewBox="0 0 24 24"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></symbol>
+    <symbol id="i-telegram" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+    <symbol id="i-mensagem" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></symbol>
+    <symbol id="i-cozinha" viewBox="0 0 24 24"><path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/></symbol>
+    <symbol id="i-percentual" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m15 9-6 6"/><path d="M9 9h.01"/><path d="M15 15h.01"/></symbol>
+    <symbol id="i-etiqueta-pct" viewBox="0 0 24 24"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7" cy="7" r="1.1"/><path d="m10 15.5 5-5"/><circle cx="10.6" cy="11" r="1"/><circle cx="14.4" cy="14.8" r="1"/></symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r=".6" fill="currentColor"/></symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M3.5 20.5 4.8 16.4A8.6 8.6 0 1 1 8 19.3z"/><path d="M9.2 8.4c.3-.6.6-.6.9-.6h.6c.2 0 .4.1.5.4l.7 1.7c.1.2 0 .5-.1.6l-.5.6c-.1.2-.1.4 0 .6.6 1 1.4 1.8 2.4 2.4.2.1.4.1.6 0l.6-.5c.2-.1.4-.2.6-.1l1.7.7c.3.1.4.3.4.5v.6c0 .3 0 .6-.6.9-.6.3-1.4.5-2.6.1-1.9-.7-3.6-2.3-4.6-4.1-.6-1.2-.9-2.3-.6-3.2z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-chama" viewBox="0 0 24 24"><defs><linearGradient id="g-chama" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff5a1f"/><stop offset=".55" stop-color="#ff9a1f"/><stop offset="1" stop-color="#ffd23f"/></linearGradient></defs><path d="M12.6 1.5c.4 3.1-1.3 4.9-3 6.7C7.8 10.1 6 12 6 15a6 6 0 0 0 12 0c0-2.4-1-4.3-2.3-5.8-.2 1.5-.9 2.6-2 3.1.7-3.9-.1-7.6-1.1-10.8z" fill="url(#g-chama)" stroke="none"/><path d="M12.2 12.4c-1.5 1.5-2.6 2.6-2.6 4.3a2.6 2.6 0 0 0 5.2 0c0-1.7-1-3-2.6-4.3z" fill="#ffe680" stroke="none"/></symbol>
+    
+    <symbol id="d-sacola" viewBox="0 0 64 64">
+      <path d="M22.5 22.5v-6.5a9.5 9.5 0 0 1 19 0v6.5" fill="none" stroke="#ffd21a" stroke-width="4.2" stroke-linecap="round"/>
+      <path d="M15 19.5h34a4.2 4.2 0 0 1 4.2 3.9l2.3 30.8a4.6 4.6 0 0 1-4.6 4.9H13.1a4.6 4.6 0 0 1-4.6-4.9l2.3-30.8a4.2 4.2 0 0 1 4.2-3.9z" fill="url(#g-amarelo)"/>
+      <circle cx="22.5" cy="24.6" r="2.1" fill="#fff"/>
+      <circle cx="41.5" cy="24.6" r="2.1" fill="#fff"/>
+      <ellipse cx="32" cy="41.4" rx="17.6" ry="11.6" fill="#eaf1ff" stroke="#1b3a92" stroke-width="2.3"/>
+      <g transform="translate(20 29.8)" fill="none" stroke="#1b3a92" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m11 17 2 2a1 1 0 1 0 3-3"/>
+        <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/>
+        <path d="m21 3 1 11h-2"/>
+        <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/>
+        <path d="M3 4h8"/>
+      </g>
+    </symbol>
+    <symbol id="d-risco-logo" viewBox="0 0 200 14">
+      <path d="M2 3.2Q100 17 198 3.2Q100 9.6 2 3.2Z" fill="#ffd21a"/>
+    </symbol>
+    <symbol id="d-risco" viewBox="0 0 300 20">
+      <path d="M3 15.5C80 8.5 180 4.6 297 5.4c-2.4 2.6-6 3.9-11 4C190 10.6 96 13 3 15.5Z" fill="url(#g-amarelo)"/>
+    </symbol>
+    <symbol id="d-raios" viewBox="0 0 64 64">
+      <g fill="none" stroke="#ffd21a" stroke-width="6.5" stroke-linecap="round">
+        <path d="M13 33 6 9"/>
+        <path d="m24 37 19-21"/>
+        <path d="m29 50 28-5"/>
+      </g>
+    </symbol>
+    <symbol id="d-etiqueta" viewBox="0 0 110 150">
+      <path d="M55 37c3-14 12-27 30-34" fill="none" stroke="#ffd21a" stroke-width="3.6" stroke-linecap="round"/>
+      <path d="M50.6 14.8a6 6 0 0 1 8.8 0l24.4 25.6a8 8 0 0 1 2.2 5.5V134a10 10 0 0 1-10 10H34a10 10 0 0 1-10-10V45.9a8 8 0 0 1 2.2-5.5z" fill="url(#g-amarelo)"/>
+      <circle cx="55" cy="39" r="6.6" fill="#0a3cb8"/>
+      <g fill="none" stroke="#13338c" stroke-linecap="round">
+        <circle cx="42.5" cy="76" r="8.4" stroke-width="5.6"/>
+        <circle cx="67.5" cy="110" r="8.4" stroke-width="5.6"/>
+        <path d="M70 70 40 116" stroke-width="6.4"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <!-- ============================ ENTRADA ============================ -->
+  <section class="entrada" id="tela-entrada">
+    <div class="entrada__cartao">
+      <div class="entrada__marca">
+        <svg class="entrada__sacola" aria-hidden="true"><use href="#d-sacola"/></svg>
+        <div>
+          <h1 class="entrada__titulo">Painel do Achados do ML</h1>
+          <p class="entrada__sub">Edite o topo, as imagens, os produtos e os links do seu site.</p>
+        </div>
+      </div>
+
+      <form class="entrada__form" id="form-entrada" autocomplete="off">
+        <p class="entrada__texto">Para publicar direto no site, conecte o painel ao repositório do GitHub onde o site está. Isso é feito uma vez só neste aparelho.</p>
+        <label class="p-campo">
+          <span>Token do GitHub</span>
+          <input name="token" type="password" placeholder="github_pat_..." required autocomplete="off" spellcheck="false">
+        </label>
+        <label class="p-campo">
+          <span>Repositório</span>
+          <input name="repo" type="text" placeholder="usuario/repositorio" required spellcheck="false" autocapitalize="off">
+        </label>
+        <div class="p-duas">
+          <label class="p-campo">
+            <span>Branch</span>
+            <input name="branch" type="text" value="main" required spellcheck="false" autocapitalize="off">
+          </label>
+          <label class="p-campo">
+            <span>Pasta do site</span>
+            <input name="pasta" type="text" value="achados-do-ml" spellcheck="false" autocapitalize="off">
+          </label>
+        </div>
+        <label class="p-marca">
+          <input name="lembrar" type="checkbox" checked> Lembrar neste aparelho
+        </label>
+        <p class="p-erro" id="erro-entrada" role="alert" hidden></p>
+        <button class="p-btn p-btn--primario p-btn--largo" type="submit" id="botao-conectar">Conectar e abrir o painel</button>
+
+        <details class="entrada__ajuda">
+          <summary>Como criar o token (2 minutos)</summary>
+          <ol>
+            <li>Entre no GitHub e abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Settings → Developer settings → Fine-grained tokens → Generate new token</a>.</li>
+            <li>Dê um nome (ex.: <em>Painel Achados</em>) e escolha a validade.</li>
+            <li>Em <strong>Repository access</strong>, marque <em>Only select repositories</em> e escolha o repositório do site.</li>
+            <li>Em <strong>Permissions → Repository permissions → Contents</strong>, escolha <em>Read and write</em>.</li>
+            <li>Clique em <strong>Generate token</strong>, copie o código (começa com <code>github_pat_</code>) e cole aqui.</li>
+          </ol>
+          <p>O token fica guardado só neste navegador. Ninguém mais consegue publicar sem ele.</p>
+        </details>
+      </form>
+
+      <div class="entrada__ou"><span>ou</span></div>
+      <button class="p-btn p-btn--largo" type="button" id="botao-local">Usar sem conectar</button>
+      <p class="entrada__nota">Sem conexão você edita e vê a prévia, mas para publicar precisa baixar o arquivo <code>dados.js</code> e enviar para a hospedagem.</p>
+      <a class="entrada__voltar" href="index.html">← Voltar ao site</a>
+    </div>
+  </section>
+
+  <!-- ============================ PAINEL ============================ -->
+  <div class="p-app" id="tela-painel" hidden>
+    <header class="p-topo">
+      <div class="p-topo__barra">
+        <a class="p-topo__marca" href="index.html" target="_blank" rel="noopener" title="Abrir o site">
+          <svg aria-hidden="true"><use href="#d-sacola"/></svg>
+          <span>Painel</span>
+        </a>
+        <div class="p-topo__estado">
+          <span class="p-pilula" id="estado-conexao"></span>
+          <span class="p-pilula p-pilula--alerta" id="estado-alterado" hidden>Alterações não publicadas</span>
+        </div>
+        <div class="p-topo__acoes">
+          <button class="p-btn p-btn--claro" type="button" id="botao-previa">
+            <svg class="icone" aria-hidden="true"><use href="#i-clique"/></svg><span>Prévia</span>
+          </button>
+          <button class="p-btn p-btn--primario" type="button" id="botao-publicar">
+            <svg class="icone" aria-hidden="true"><use href="#i-check"/></svg><span id="texto-publicar">Publicar</span>
+          </button>
+          <button class="p-btn p-btn--fantasma" type="button" id="botao-sair" title="Sair do painel">Sair</button>
+        </div>
+      </div>
+      <nav class="p-abas" role="tablist" aria-label="Seções do painel">
+        <button class="p-aba" role="tab" type="button" aria-selected="true" aria-controls="aba-topo" id="tab-topo">Topo do site</button>
+        <button class="p-aba" role="tab" type="button" aria-selected="false" aria-controls="aba-produtos" id="tab-produtos">Produtos <span class="p-aba__qtd" id="qtd-produtos"></span></button>
+        <button class="p-aba" role="tab" type="button" aria-selected="false" aria-controls="aba-categorias" id="tab-categorias">Categorias</button>
+        <button class="p-aba" role="tab" type="button" aria-selected="false" aria-controls="aba-redes" id="tab-redes">Redes e ajustes</button>
+      </nav>
+    </header>
+
+    <main class="p-conteudo">
+      <!-- ---------------------------- TOPO ---------------------------- -->
+      <section class="p-secao" id="aba-topo" role="tabpanel" aria-labelledby="tab-topo">
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Título</h2>
+          <div class="p-campos">
+            <label class="p-campo"><span>Linha 1</span><input data-campo="hero.linha1" type="text" maxlength="60"></label>
+            <label class="p-campo"><span>Linha 2 — destaque amarelo</span><input data-campo="hero.destaque" type="text" maxlength="40"></label>
+            <label class="p-campo"><span>Linha 3</span><input data-campo="hero.linha3" type="text" maxlength="50"><small>A última palavra ganha o risco amarelo embaixo.</small></label>
+          </div>
+        </div>
+
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Subtítulo</h2>
+          <div class="p-campos">
+            <div class="p-duas">
+              <label class="p-campo"><span>Início</span><input data-campo="hero.subtitulo" type="text" maxlength="80"></label>
+              <label class="p-campo"><span>Destaque amarelo</span><input data-campo="hero.subtituloDestaque" type="text" maxlength="60"></label>
+            </div>
+            <label class="p-campo"><span>Segunda linha</span><input data-campo="hero.subtituloFim" type="text" maxlength="90"></label>
+          </div>
+        </div>
+
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Selos</h2>
+          <div class="p-selos">
+            <fieldset class="p-selo"><legend><svg class="icone" aria-hidden="true"><use href="#i-escudo"/></svg> Selo 1</legend>
+              <input data-campo="hero.selos.0.linha1" type="text" maxlength="20" aria-label="Selo 1, linha 1">
+              <input data-campo="hero.selos.0.linha2" type="text" maxlength="20" aria-label="Selo 1, linha 2">
+            </fieldset>
+            <fieldset class="p-selo"><legend><svg class="icone" aria-hidden="true"><use href="#i-caminhao"/></svg> Selo 2</legend>
+              <input data-campo="hero.selos.1.linha1" type="text" maxlength="20" aria-label="Selo 2, linha 1">
+              <input data-campo="hero.selos.1.linha2" type="text" maxlength="20" aria-label="Selo 2, linha 2">
+            </fieldset>
+            <fieldset class="p-selo"><legend><svg class="icone" aria-hidden="true"><use href="#i-aperto"/></svg> Selo 3</legend>
+              <input data-campo="hero.selos.2.linha1" type="text" maxlength="20" aria-label="Selo 3, linha 1">
+              <input data-campo="hero.selos.2.linha2" type="text" maxlength="20" aria-label="Selo 3, linha 2">
+            </fieldset>
+          </div>
+        </div>
+
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Botão amarelo</h2>
+          <div class="p-campos">
+            <label class="p-campo"><span>Texto do botão</span><input data-campo="hero.botaoTexto" type="text" maxlength="40"></label>
+            <label class="p-campo"><span>Link do botão</span><input data-campo="hero.botaoLink" type="url" inputmode="url" placeholder="https://mercadolivre.com/sec/..." spellcheck="false"><small>Seu link de afiliado (vitrine, perfil ou uma busca). Vazio = o botão rola até as ofertas.</small></label>
+          </div>
+        </div>
+
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Imagens do topo</h2>
+          <p class="p-ajuda">Para ficar igual ao layout, use <strong>PNG com fundo transparente</strong> e pelo menos 1500 px de largura. O painel ajusta o tamanho e converte para o formato leve sozinho.</p>
+          <div class="p-imagens-topo">
+            <div class="p-img-topo" data-img-topo="imagemComputador">
+              <p class="p-img-topo__rotulo">Computador</p>
+              <div class="p-img-topo__quadro"><img alt="Imagem do topo no computador"></div>
+              <div class="p-img-topo__acoes">
+                <label class="p-btn p-btn--claro p-btn--arquivo">Trocar imagem<input type="file" accept="image/png,image/webp,image/jpeg"></label>
+                <button class="p-btn p-btn--fantasma" type="button" data-restaurar>Usar a original</button>
+              </div>
+            </div>
+            <div class="p-img-topo" data-img-topo="imagemCelular">
+              <p class="p-img-topo__rotulo">Celular</p>
+              <div class="p-img-topo__quadro"><img alt="Imagem do topo no celular"></div>
+              <div class="p-img-topo__acoes">
+                <label class="p-btn p-btn--claro p-btn--arquivo">Trocar imagem<input type="file" accept="image/png,image/webp,image/jpeg"></label>
+                <button class="p-btn p-btn--fantasma" type="button" data-restaurar>Usar a original</button>
+              </div>
+            </div>
+          </div>
+          <label class="p-campo p-campo--topo"><span>Descrição das imagens (para leitores de tela e Google)</span><input data-campo="hero.imagemDescricao" type="text" maxlength="200"></label>
+        </div>
+      </section>
+
+      <!-- -------------------------- PRODUTOS -------------------------- -->
+      <section class="p-secao" id="aba-produtos" role="tabpanel" aria-labelledby="tab-produtos" hidden>
+        <div class="p-barra">
+          <label class="p-busca">
+            <svg class="icone" aria-hidden="true"><use href="#i-busca"/></svg>
+            <span class="sr-only">Buscar produto</span>
+            <input type="search" id="busca-produtos" placeholder="Buscar produto...">
+          </label>
+          <button class="p-btn p-btn--primario" type="button" id="botao-novo-produto">
+            <svg class="icone" aria-hidden="true"><use href="#i-sacola"/></svg> Adicionar produto
+          </button>
+        </div>
+        <div class="p-aviso-exemplos" id="aviso-exemplos" hidden>
+          <p><strong id="qtd-exemplos"></strong> ainda são exemplos (sem o seu link de afiliado). Eles aparecem com a etiqueta “Exemplo” no site.</p>
+          <button class="p-btn p-btn--perigo" type="button" id="botao-remover-exemplos">Remover exemplos</button>
+        </div>
+        <p class="p-ajuda">A ordem desta lista é a ordem no site (em “Mais relevantes”). Use as setas para mudar.</p>
+        <ul class="p-lista" id="lista-produtos-painel"></ul>
+        <p class="p-vazio" id="vazio-produtos" hidden>Nenhum produto encontrado.</p>
+      </section>
+
+      <!-- ------------------------- CATEGORIAS ------------------------- -->
+      <section class="p-secao" id="aba-categorias" role="tabpanel" aria-labelledby="tab-categorias" hidden>
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Categorias</h2>
+          <p class="p-ajuda">Aparecem nos quadradinhos do topo (computador), nos filtros e no menu. Use as setas para mudar a ordem.</p>
+          <ul class="p-cats" id="lista-categorias-painel"></ul>
+          <form class="p-nova-cat" id="form-nova-categoria">
+            <label class="p-campo"><span>Nova categoria</span><input name="nome" type="text" maxlength="30" placeholder="Ex.: Beleza" required></label>
+            <button class="p-btn p-btn--claro" type="submit">Adicionar</button>
+          </form>
+        </div>
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Atalhos no celular</h2>
+          <p class="p-ajuda">Escolha quais quadradinhos aparecem no celular e em que ordem (o ideal são 8: duas linhas de 4). As outras categorias continuam nos filtros.</p>
+          <ul class="p-cats p-cats--cel" id="lista-celular-painel"></ul>
+        </div>
+      </section>
+
+      <!-- ------------------------ REDES E AJUSTES ------------------------ -->
+      <section class="p-secao" id="aba-redes" role="tabpanel" aria-labelledby="tab-redes" hidden>
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Redes sociais</h2>
+          <p class="p-ajuda">Aparecem na seção “Sobre nós”. Deixe vazio para esconder.</p>
+          <div class="p-campos">
+            <label class="p-campo"><span>Instagram</span><input data-campo="redes.instagram" type="url" inputmode="url" placeholder="https://instagram.com/seuperfil" spellcheck="false"></label>
+            <label class="p-campo"><span>Grupo no WhatsApp</span><input data-campo="redes.whatsapp" type="url" inputmode="url" placeholder="https://chat.whatsapp.com/..." spellcheck="false"></label>
+            <label class="p-campo"><span>Canal no Telegram</span><input data-campo="redes.telegram" type="url" inputmode="url" placeholder="https://t.me/seucanal" spellcheck="false"></label>
+          </div>
+        </div>
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Ajustes</h2>
+          <label class="p-campo p-campo--curto"><span>Ofertas antes do botão “Ver mais”</span><input data-campo="produtosPorPagina" data-tipo="inteiro" type="number" min="4" max="60" step="1"></label>
+        </div>
+        <div class="p-cartao">
+          <h2 class="p-cartao__titulo">Cópia de segurança</h2>
+          <p class="p-ajuda">Baixa o arquivo <code>dados.js</code> com tudo o que está no painel agora. No modo sem conexão, é este arquivo que você envia para a hospedagem, na pasta <code>js/</code>.</p>
+          <button class="p-btn p-btn--claro" type="button" id="botao-baixar">Baixar dados.js</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ======================== EDITOR DE PRODUTO ======================== -->
+  <dialog class="p-dialogo" id="editor-produto" aria-labelledby="editor-titulo">
+    <form class="p-dialogo__form" id="form-produto" method="dialog" novalidate>
+      <header class="p-dialogo__cabeca">
+        <h2 id="editor-titulo">Produto</h2>
+        <button class="p-icone-btn" type="button" data-fechar aria-label="Fechar"><svg class="icone" aria-hidden="true"><use href="#i-fechar"/></svg></button>
+      </header>
+      <div class="p-dialogo__corpo">
+        <div class="p-previa-produto" aria-hidden="true">
+          <div class="p-previa-produto__foto" id="ed-previa-foto"></div>
+          <div>
+            <p class="p-previa-produto__titulo" id="ed-previa-titulo">Nome do produto</p>
+            <p class="p-previa-produto__legenda" id="ed-previa-legenda" hidden></p>
+            <p class="p-previa-produto__preco"><span id="ed-previa-preco">R$ 0,00</span> <span class="p-previa-produto__off" id="ed-previa-off"></span></p>
+          </div>
+        </div>
+
+        <label class="p-campo" data-erro-de="link"><span>Seu link de afiliado *</span><input name="link" type="url" inputmode="url" placeholder="https://mercadolivre.com/sec/..." spellcheck="false" autocapitalize="off"><small>Na barra de afiliados do Mercado Livre: Compartilhar → copiar link.</small></label>
+        <label class="p-campo" data-erro-de="titulo"><span>Nome do produto *</span><input name="titulo" type="text" maxlength="140" placeholder="Ex.: Air Fryer Digital 5L 1500W"></label>
+        <label class="p-campo"><span>Legenda (opcional)</span><input name="legenda" type="text" maxlength="60" placeholder="Ex.: Menor preço dos últimos 30 dias"><small>Um destaque curto que aparece embaixo do nome.</small></label>
+        <label class="p-campo"><span>Categoria *</span><select name="categoria" id="ed-categoria"></select></label>
+        <div class="p-duas">
+          <label class="p-campo" data-erro-de="preco"><span>Preço atual (R$) *</span><input name="preco" type="text" inputmode="decimal" placeholder="379,90"></label>
+          <label class="p-campo" data-erro-de="precoAntigo"><span>Preço antigo (R$)</span><input name="precoAntigo" type="text" inputmode="decimal" placeholder="599,90"></label>
+        </div>
+        <div class="p-duas">
+          <label class="p-campo"><span>Parcelas sem juros</span><input name="parcelas" type="number" inputmode="numeric" min="2" max="24" placeholder="10"></label>
+          <label class="p-campo"><span>Quantidade vendida</span><input name="vendidos" type="number" inputmode="numeric" min="0" placeholder="5000"><small>Opcional. Aparece “+5 mil vendidos”.</small></label>
+        </div>
+        <div class="p-duas">
+          <label class="p-campo"><span>Nota (0 a 5)</span><input name="avaliacao" type="text" inputmode="decimal" placeholder="4,8"></label>
+          <label class="p-campo"><span>Nº de avaliações</span><input name="avaliacoes" type="number" inputmode="numeric" min="0" placeholder="1520"></label>
+        </div>
+
+        <div class="p-campo">
+          <span>Foto do produto</span>
+          <div class="p-foto">
+            <input name="imagem" type="text" inputmode="url" placeholder="Cole o link da foto ou envie um arquivo" spellcheck="false" autocapitalize="off" aria-label="Link da foto">
+            <label class="p-btn p-btn--claro p-btn--arquivo" id="ed-enviar-foto">Enviar foto<input type="file" accept="image/*" id="ed-arquivo"></label>
+          </div>
+          <small>No anúncio do Mercado Livre: botão direito na foto → “Copiar endereço da imagem”.</small>
+        </div>
+
+        <div class="p-marcas">
+          <label class="p-marca"><input name="freteGratis" type="checkbox"> Frete grátis</label>
+          <label class="p-marca"><input name="maisVendido" type="checkbox"> Mais vendido</label>
+          <label class="p-marca"><input name="ofertaDoDia" type="checkbox"> Oferta do dia</label>
+        </div>
+        <div class="p-erros" id="ed-erros" role="alert"></div>
+      </div>
+      <footer class="p-dialogo__rodape">
+        <button class="p-btn p-btn--fantasma" type="button" data-fechar>Cancelar</button>
+        <button class="p-btn p-btn--primario" type="submit" value="salvar">Salvar produto</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+  <div class="p-carregando" id="carregando" hidden><span class="p-giro" aria-hidden="true"></span><span id="carregando-texto">Carregando…</span></div>
+
+  <script src="js/painel.js"></script>
+</body>
+</html>

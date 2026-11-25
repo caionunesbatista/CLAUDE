@@ -1,13 +1,14 @@
 /* ==========================================================================
    Achados do ML — funcionamento do site
-   Você não precisa editar este arquivo: produtos em js/produtos.js e
-   configurações em js/config.js.
+   Você não precisa editar este arquivo: tudo o que muda (topo, produtos,
+   categorias, links e redes) é editado pelo painel (painel.html) e fica
+   guardado em js/dados.js.
    ========================================================================== */
 (function () {
   'use strict';
 
-  var CONFIG = window.ACHADOS_CONFIG || {};
-  var BRUTOS = Array.isArray(window.ACHADOS_PRODUTOS) ? window.ACHADOS_PRODUTOS : [];
+  var CONFIG = window.ACHADOS_DADOS || {};
+  var BRUTOS = Array.isArray(CONFIG.produtos) ? CONFIG.produtos : [];
   var POR_PAGINA = Math.max(4, parseInt(CONFIG.produtosPorPagina, 10) || 12);
   var ICONES_VALIDOS = {
     celular: 1, notebook: 1, fone: 1, controle: 1, casa: 1, liquidificador: 1, haltere: 1, camiseta: 1,
@@ -131,12 +132,14 @@
     if (!(parcelas >= 2 && parcelas <= 24)) parcelas = 0;
     var categoria = String(p.categoria || '').trim();
     if (!POR_ID[categoria] || categoria === OFERTAS_DO_DIA.id) {
-      console.warn('[Achados do ML] "' + titulo + '": categoria "' + categoria + '" não existe em js/config.js.');
+      console.warn('[Achados do ML] "' + titulo + '": a categoria "' + categoria + '" não existe.');
     }
     var nota = numero(p.avaliacao);
+    var legenda = typeof p.legenda === 'string' ? p.legenda.trim() : '';
     PRODUTOS.push({
       ordem: i,
       titulo: titulo,
+      legenda: legenda,
       categoria: categoria,
       preco: preco,
       precoAntigo: antigo,
@@ -150,7 +153,8 @@
       ofertaDoDia: p.ofertaDoDia === true,
       avaliacao: nota >= 0 && nota <= 5 ? nota : NaN,
       avaliacoes: parseInt(p.avaliacoes, 10) || 0,
-      busca: normalizar(titulo + ' ' + (POR_ID[categoria] ? POR_ID[categoria].nome : categoria))
+      vendidos: Math.max(0, parseInt(p.vendidos, 10) || 0),
+      busca: normalizar(titulo + ' ' + legenda + ' ' + (POR_ID[categoria] ? POR_ID[categoria].nome : categoria))
     });
   });
 
@@ -161,7 +165,7 @@
   }
 
   /* ------------------------------------------------------------ estado */
-  var ORDENS = { relevancia: 1, 'menor-preco': 1, 'maior-preco': 1, desconto: 1 };
+  var ORDENS = { relevancia: 1, 'mais-vendidos': 1, 'menor-preco': 1, 'maior-preco': 1, desconto: 1 };
   var estado = { categoria: 'todas', busca: '', ordem: 'relevancia', frete: false, limite: POR_PAGINA };
 
   function lerUrl() {
@@ -230,13 +234,20 @@
     var corpo = el('div', { class: 'produto__corpo' });
     if (cat) corpo.appendChild(el('span', { class: 'produto__cat', text: cat.nome }));
     corpo.appendChild(el('h3', { class: 'produto__titulo', title: p.titulo, text: p.titulo }));
+    if (p.legenda) corpo.appendChild(el('p', { class: 'produto__legenda', text: p.legenda }));
 
-    if (p.avaliacao >= 0) {
-      corpo.appendChild(el('p', { class: 'produto__nota', 'aria-label': 'Nota ' + fmtNota.format(p.avaliacao) + ' de 5' }, [
-        icone('estrela'),
-        fmtNota.format(p.avaliacao),
-        p.avaliacoes ? el('span', { text: '(' + fmtInteiro.format(p.avaliacoes) + ')' }) : null
-      ]));
+    var vendidosTxt = p.vendidos ? '+' + (p.vendidos >= 1000 ? fmtInteiro.format(Math.floor(p.vendidos / 1000)) + ' mil' : p.vendidos) + ' vendidos' : '';
+    if (p.avaliacao >= 0 || vendidosTxt) {
+      var nota = el('p', { class: 'produto__nota' });
+      if (p.avaliacao >= 0) {
+        nota.appendChild(el('span', { class: 'produto__estrelas', 'aria-label': 'Nota ' + fmtNota.format(p.avaliacao) + ' de 5' }, [
+          icone('estrela'),
+          fmtNota.format(p.avaliacao),
+          p.avaliacoes ? el('span', { class: 'produto__qtd-av', text: '(' + fmtInteiro.format(p.avaliacoes) + ')' }) : null
+        ]));
+      }
+      if (vendidosTxt) nota.appendChild(el('span', { class: 'produto__vendidos', text: vendidosTxt }));
+      corpo.appendChild(nota);
     }
 
     var precos = el('div', { class: 'produto__precos' });
@@ -292,6 +303,11 @@
     });
     var ord = {
       relevancia: function (a, b) { return a.ordem - b.ordem; },
+      // Primeiro os marcados como "mais vendido", depois quem vendeu mais
+      'mais-vendidos': function (a, b) {
+        return (b.maisVendido - a.maisVendido) || (b.vendidos - a.vendidos) ||
+          (b.avaliacoes - a.avaliacoes) || a.ordem - b.ordem;
+      },
       'menor-preco': function (a, b) { return a.preco - b.preco || a.ordem - b.ordem; },
       'maior-preco': function (a, b) { return b.preco - a.preco || a.ordem - b.ordem; },
       desconto: function (a, b) { return b.desconto - a.desconto || a.ordem - b.ordem; }
@@ -718,13 +734,8 @@
 
   /* --------------------------------------------------- config extras */
   function aplicarConfig() {
-    var cta = $('#cta-principal');
-    if (linkValido(CONFIG.linkPrincipal) && !/SEU-LINK/i.test(CONFIG.linkPrincipal)) {
-      cta.href = CONFIG.linkPrincipal.trim();
-      cta.target = '_blank';
-      cta.rel = 'noopener noreferrer sponsored nofollow';
-      cta.setAttribute('aria-label', 'Explorar Ofertas no Mercado Livre (abre em nova aba)');
-    }
+    // O botão amarelo e as imagens do topo são aplicados por js/base.js
+    if (window.ACHADOS_PREVIA) $('#faixa-previa').hidden = false;
 
     var redes = CONFIG.redes || {};
     var dados = [
