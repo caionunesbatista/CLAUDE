@@ -87,6 +87,10 @@ body.painel { background: #f1f4fb; min-height: 100vh; }
 .entrada__titulo { font-family: var(--fonte-titulo); font-weight: 600; font-size: 24px; line-height: 1.1; color: var(--azul-950); }
 .entrada__sub { color: var(--tinta-2); font-size: 14.5px; margin-top: 4px; }
 .entrada__form { display: grid; gap: 14px; }
+.entrada__h2 { font-family: var(--fonte-titulo); font-weight: 600; font-size: 20px; color: var(--azul-950); }
+.entrada__checando { padding: 18px 0; text-align: center; color: var(--tinta-3); font-weight: 700; }
+.entrada__link { justify-self: center; padding: 6px 10px; border: 0; background: none; color: var(--azul-600); font-weight: 800; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.entrada__link:hover { color: var(--azul-700); }
 .entrada__texto { color: var(--tinta-2); font-size: 14.5px; }
 .entrada__ajuda { border-radius: 14px; background: var(--azul-50); padding: 12px 14px; font-size: 14px; color: var(--tinta-2); }
 .entrada__ajuda summary { cursor: pointer; font-weight: 800; color: var(--azul-700); }

@@ -884,6 +884,15 @@ input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appe
 .rodape__aviso { border-top: 1px solid rgba(255, 255, 255, .12); padding-block: 22px 30px; display: grid; gap: 10px; font-size: 13px; color: #9fb1e2; }
 .rodape__aviso strong { color: #dbe4ff; }
 .rodape__copy { color: #8195cf; }
+.rodape__fim { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+/* Link discreto para o painel do proprietário */
+.rodape__dono {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 0;
+  color: #6a7fbd; font-size: 12px; font-weight: 700; text-decoration: none;
+  opacity: .75; transition: opacity .2s, color .2s;
+}
+.rodape__dono .icone { width: 13px; height: 13px; stroke-width: 2.2; }
+.rodape__dono:hover, .rodape__dono:focus-visible { opacity: 1; color: #c9d6fb; }
 #lista-rodape { grid-template-columns: 1fr 1fr; column-gap: 20px; }
 @media (min-width: 700px) {
   .rodape__grade { grid-template-columns: 1.4fr 1fr 1.4fr; }

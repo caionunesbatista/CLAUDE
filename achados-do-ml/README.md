@@ -6,8 +6,8 @@ preço ou desconto) e clica em **Ver no Mercado Livre**: o botão abre o anúnci
 com o **seu link de afiliado**.
 
 Tudo o que muda no dia a dia — textos e imagens do topo, botão amarelo,
-produtos, legendas, links, categorias e redes — é editado pelo **painel**
-(`painel.html`), sem mexer em código.
+produtos, legendas, links, categorias e redes — é editado na **Área do
+proprietário** (link discreto no rodapé), com e-mail e senha, sem mexer em código.
 
 - **Sem instalação e sem build**: é HTML, CSS e JavaScript puro.
 - **Herói igual ao layout**, com uma versão para computador e outra para celular.
@@ -15,56 +15,50 @@ produtos, legendas, links, categorias e redes — é editado pelo **painel**
 
 ---
 
-## 1. Colocar o site no ar (uma vez só)
+## 1. Onde o site está
 
-Para o painel publicar sozinho, a hospedagem precisa estar ligada ao
-repositório do GitHub. Assim, cada vez que você clica em **Publicar**, o site
-atualiza em 1 a 2 minutos.
+O site roda na **Vercel** (projeto `achados-do-ml`), ligado a este repositório
+do GitHub, pasta `achados-do-ml`. Cada alteração de código enviada para a
+branch de produção publica o site de novo sozinha.
 
-**Vercel** (ou Netlify / Cloudflare Pages, que funcionam igual):
+O que você edita pelo painel (textos, produtos, imagens) **não depende do
+GitHub**: fica guardado no armazenamento da Vercel (Vercel Blob privado) e
+aparece no site na hora em que você clica em **Publicar**.
 
-1. Entre em <https://vercel.com> com a sua conta do GitHub.
-2. **Add New → Project** e escolha o repositório do site.
-3. Em **Root Directory**, escolha a pasta `achados-do-ml`.
-4. **Framework Preset:** *Other*. Não há comando de build.
-5. Clique em **Deploy**. Pronto: o site ganha um endereço (dá para ligar um
-   domínio seu depois).
+Variáveis de ambiente do projeto na Vercel:
 
-Anote qual **branch** a hospedagem publica (normalmente `main`). É essa branch
-que você vai informar no painel.
-
-Depois de publicar, troque no `index.html` o endereço da imagem de
-compartilhamento pelo endereço completo do seu site (o WhatsApp e o Facebook
-exigem isso):
-
-```html
-<meta property="og:image" content="https://SEU-DOMINIO/img/og-image.jpg">
-```
+| Variável | Para quê |
+|---|---|
+| `BLOB_READ_WRITE_TOKEN` | Acesso ao armazenamento (criada ao conectar o Blob ao projeto) |
+| `SESSAO_SEGREDO` | Assina o login do painel. Se trocar, todo mundo é deslogado. |
+| `CODIGO_ATIVACAO` | Código para criar o acesso do proprietário ou uma nova senha. **Guarde em segredo.** |
 
 ---
 
-## 2. Usar o painel
+## 2. Área do proprietário (painel)
 
-Abra **`https://SEU-SITE/painel.html`** (o painel não aparece no menu do site
-nem no Google).
+No fim do site, no rodapé, tem o link discreto **Área do proprietário**
+(endereço: `/painel.html`). Ele não aparece no menu nem no Google.
 
-### Conectar (uma vez por aparelho)
+### Primeiro acesso
 
-O painel pede um **token do GitHub**: uma senha que só serve para alterar o
-repositório do site.
+1. Clique em **Área do proprietário**.
+2. Digite o seu e-mail, crie uma senha (8+ caracteres, com letras e números)
+   e o **código de ativação**.
+3. Pronto: só esse e-mail e essa senha entram no painel.
 
-1. Abra <https://github.com/settings/personal-access-tokens/new>.
-2. Dê um nome (ex.: *Painel Achados*) e escolha a validade.
-3. **Repository access → Only select repositories** → escolha o repositório do site.
-4. **Permissions → Repository permissions → Contents → Read and write**.
-5. **Generate token**, copie (começa com `github_pat_`) e cole no painel.
+### Esqueci a senha
 
-Preencha também o **repositório** (`usuario/repositorio`), a **branch** que a
-hospedagem publica e a **pasta do site** (`achados-do-ml`). Com
-"Lembrar neste aparelho" marcado, nas próximas vezes o painel abre direto.
+Na tela de login, clique em **Esqueci minha senha**, digite o e-mail, a nova
+senha e o código de ativação. A senha antiga para de funcionar na hora.
 
-O token fica guardado só no seu navegador. Sem ele, ninguém consegue publicar,
-mesmo que abra o endereço do painel.
+### Segurança
+
+- A senha é guardada com *scrypt* (nunca em texto puro).
+- O login fica num cookie protegido (HttpOnly, Secure, SameSite=Strict) e
+  dura 7 dias; **Sair** encerra na hora.
+- Depois de várias senhas erradas seguidas, aquele aparelho espera 15 minutos.
+- Ninguém cria um acesso novo sem o código de ativação.
 
 ### O que dá para fazer
 
@@ -76,9 +70,11 @@ mesmo que abra o endereço do painel.
 | **Redes e ajustes** | Instagram, grupo de WhatsApp, canal do Telegram, quantas ofertas antes do "Ver mais" e uma cópia de segurança do arquivo de dados. |
 
 - **Prévia** abre o site com as suas alterações antes de publicar (só você vê).
-- **Publicar** envia tudo de uma vez. O site atualiza em 1 a 2 minutos.
-- Alterações não publicadas ficam salvas como rascunho no aparelho: se fechar
-  a página sem querer, o painel pergunta se quer continuar de onde parou.
+- **Publicar** grava e atualiza o site na hora. Cada publicação guarda uma
+  cópia de segurança.
+- Se você editar em dois aparelhos ao mesmo tempo, o painel avisa antes de
+  substituir o que foi publicado pelo outro.
+- Alterações não publicadas ficam salvas como rascunho no aparelho.
 
 ### Fotos e imagens
 
@@ -86,19 +82,16 @@ mesmo que abra o endereço do painel.
   *Copiar endereço da imagem*) ou clique em **Enviar foto** para mandar um
   arquivo do celular/computador. O painel reduz e converte para WebP sozinho.
 - **Imagens do topo:** para ficar igual ao layout, use **PNG com fundo
-  transparente** e pelo menos 1500 px de largura. O painel gera os tamanhos
-  certos para cada tela. **Usar a original** volta para a arte atual.
+  transparente** e pelo menos 1500 px de largura. **Usar a original** volta
+  para a arte atual.
 
-Os produtos que ainda estão com `SEU-LINK` aparecem com a etiqueta **Exemplo**
-no site e não levam a lugar nenhum. O painel avisa quantos são e tem um botão
-para remover todos de uma vez.
+### Limites do plano gratuito da Vercel
 
-### Sem conectar ao GitHub
-
-Na tela de entrada, **Usar sem conectar** abre o painel para editar e ver a
-prévia. No fim, **Baixar dados.js** baixa o arquivo com tudo; envie-o para a
-hospedagem substituindo `js/dados.js`. Nesse modo não dá para enviar
-arquivos de imagem (use links de imagem).
+O site foi feito para gastar pouco: os dados ficam no cache da Vercel e o
+armazenamento só é lido quando você publica. No plano Hobby o Blob inclui
+1 GB, 10 mil leituras e 2 mil gravações por mês. Cada publicação usa 2
+gravações e cada foto enviada usa 1 (colar o link da foto do Mercado Livre
+não gasta nada).
 
 ---
 
@@ -111,8 +104,9 @@ Abra `index.html` no navegador. Para ver exatamente como vai ficar no ar
 python3 -m http.server 8000
 ```
 
-e abra <http://localhost:8000> (o painel fica em
-<http://localhost:8000/painel.html>).
+e abra <http://localhost:8000>. O login do painel só funciona no site
+publicado (ele usa as funções da Vercel); no computador, o painel abre em
+"modo sem conexão" para editar e baixar o `dados.js`.
 
 ---
 
@@ -121,8 +115,13 @@ e abra <http://localhost:8000> (o painel fica em
 ```
 achados-do-ml/
   index.html          o site
-  painel.html         ⭐ painel de edição
-  js/dados.js         ⭐ textos, links, categorias e produtos (o painel grava aqui)
+  painel.html         ⭐ área do proprietário (painel)
+  api/admin.js        login, criar acesso, salvar e enviar imagens
+  api/dados.js        entrega os dados publicados (em /js/dados.js, com cache)
+  api/img.js          entrega as imagens enviadas pelo painel
+  api/_lib.js         senha, sessão e armazenamento
+  vercel.json         rotas e configuração das funções
+  js/dados.js         dados iniciais (usados até a primeira publicação)
   js/base.js          aplica os dados no topo e o modo prévia
   js/app.js           filtros, busca, ordenação, menu, carrossel
   js/painel.js        funcionamento do painel
@@ -134,14 +133,13 @@ achados-do-ml/
   fontes/             Fredoka e Nunito (locais, licença OFL)
 ```
 
-`js/dados.js` é JSON puro dentro de `window.ACHADOS_DADOS = { ... };`. Dá para
-editar à mão, mas o painel é o caminho mais seguro.
+Depois da primeira publicação pelo painel, os dados vivem no Blob; o
+`js/dados.js` do repositório vira só o ponto de partida.
 
 ## Detalhes técnicos
 
-- **Publicação:** o painel usa a API do GitHub e faz **um único commit** com o
-  `dados.js` e as imagens novas. Antes, confere se o arquivo mudou em outro
-  lugar e pergunta antes de substituir.
+- **Publicação:** o painel grava os dados no Blob (com controle de versão) e
+  renova o cache do site pela tag `dados`, então a mudança aparece na hora.
 - **Ordenar por "Mais vendidos":** primeiro os produtos marcados como *Mais
   vendido*, depois os com maior quantidade vendida e mais avaliações.
 - **Herói:** texto, selos e botão são HTML (nítidos em qualquer tela); as

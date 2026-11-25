@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Achados do ML — painel de edição
-   Lê e grava js/dados.js. Conectado ao GitHub, publica com um único commit
-   (dados + imagens novas) e a hospedagem atualiza o site sozinha.
-   Sem conexão, edita e baixa o dados.js para enviar à hospedagem.
+   Achados do ML — painel do proprietário
+   Entra com e-mail e senha (API do próprio site, na Vercel), edita os dados
+   e publica na hora. As imagens são enviadas assim que você escolhe.
+   Sem servidor (arquivo aberto no computador), edita e baixa o dados.js.
    ========================================================================== */
 (function () {
   'use strict';
@@ -27,21 +27,18 @@
   const LARGURAS = { imagemComputador: [800, 1200, 1496], imagemCelular: [600, 940, 1262] };
   const CABECALHO = '/* Dados do site Achados do ML: topo, links, redes, categorias e produtos.\n   Edite pelo painel (painel.html). Se editar à mão, mantenha o formato JSON. */\n';
 
-  const CHAVE_CONEXAO = 'achados-painel-conexao';
-  const CHAVE_TOKEN = 'achados-painel-token';
   const CHAVE_RASCUNHO = 'achados-painel-rascunho';
   const CHAVE_PREVIA = 'achados-previa';
   const CHAVE_ABA = 'achados-painel-aba';
 
   /** Estado do painel */
   const E = {
-    modo: null,            // 'github' ou 'local'
-    gh: null,              // { token, dono, nome, branch, pasta }
-    dados: null,           // conteúdo de dados.js
-    shaDados: null,        // versão do dados.js quando foi carregado
-    pendentes: {},         // imagens novas ainda não publicadas: caminho -> data URL
-    cacheImgs: {},         // imagens recém-publicadas (até a hospedagem atualizar)
-    alterado: false
+    modo: null,        // 'servidor' ou 'local'
+    email: '',         // proprietário conectado
+    dados: null,       // dados do site
+    versao: null,      // versão publicada quando o painel abriu (para evitar sobrescrever)
+    alterado: false,
+    temServidor: false  // o site tem a API do proprietário (Vercel)
   };
 
   /* ================================================================ util */
@@ -123,15 +120,6 @@
   function pronto() { $('#carregando').hidden = true; }
 
   /* ===================================================== arquivo de dados */
-  function lerArquivoDados(texto) {
-    const i = texto.indexOf('ACHADOS_DADOS');
-    const ini = texto.indexOf('{', i);
-    const fim = texto.lastIndexOf('}');
-    if (i < 0 || ini < 0 || fim < ini) throw new Error('O arquivo dados.js está num formato que o painel não reconhece.');
-    try { return JSON.parse(texto.slice(ini, fim + 1)); } catch (e) {
-      throw new Error('O arquivo dados.js tem um erro de digitação (JSON inválido). Restaure uma versão anterior no GitHub.');
-    }
-  }
   const gerarArquivoDados = (d) => CABECALHO + 'window.ACHADOS_DADOS = ' + JSON.stringify(d, null, 2) + ';\n';
 
   /** Garante que todos os campos existam, para o painel não quebrar */
@@ -155,113 +143,33 @@
     return d;
   }
 
-  /* ============================================================== base64 */
-  function utf8ParaBase64(txt) {
-    const bytes = new TextEncoder().encode(txt);
-    let bin = '';
-    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-    return btoa(bin);
-  }
-  function base64ParaUtf8(b64) {
-    const bin = atob(String(b64).replace(/\s/g, ''));
-    return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
-  }
-
-  /* ============================================================== GitHub */
-  const caminhoUrl = (p) => p.split('/').map(encodeURIComponent).join('/');
-  const prefixo = () => (E.gh.pasta ? E.gh.pasta + '/' : '');
-  const rotaRepo = () => `/repos/${encodeURIComponent(E.gh.dono)}/${encodeURIComponent(E.gh.nome)}`;
-
-  function erroGithub(status, msg) {
-    const textos = {
-      0: 'Sem conexão com o GitHub. Confira a internet e tente de novo.',
-      401: 'Token inválido ou expirado. Gere um novo token e conecte de novo.',
-      403: 'O token não tem permissão para alterar este repositório. Ao criar o token, escolha o repositório e dê a permissão “Contents: Read and write”.',
-      404: 'Não encontrei o site no GitHub. Confira o repositório, a branch e a pasta — e se o token tem acesso a esse repositório.',
-      409: 'O repositório mudou enquanto você publicava. Tente publicar de novo.'
-    };
-    const e = new Error(textos[status] || `O GitHub recusou a operação (${status}${msg ? ': ' + msg : ''}). Tente de novo.`);
-    e.status = status;
-    return e;
-  }
-
-  async function api(metodo, rota, corpo) {
+  /* ============================================================ servidor */
+  async function srv(acao, corpo) {
+    const opcoes = corpo === undefined
+      ? { credentials: 'same-origin', cache: 'no-store' }
+      : {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', 'X-Achados-Painel': '1' },
+        body: JSON.stringify(corpo)
+      };
     let r;
-    try {
-      r = await fetch('https://api.github.com' + rota, {
-        method: metodo,
-        cache: 'no-store',
-        headers: Object.assign({
-          Accept: 'application/vnd.github+json',
-          Authorization: 'Bearer ' + E.gh.token,
-          'X-GitHub-Api-Version': '2022-11-28'
-        }, corpo ? { 'Content-Type': 'application/json' } : {}),
-        body: corpo ? JSON.stringify(corpo) : undefined
-      });
-    } catch (e) { throw erroGithub(0); }
-    if (!r.ok) {
-      let msg = '';
-      try { msg = (await r.json()).message || ''; } catch (e) { /* sem corpo */ }
-      throw erroGithub(r.status, msg);
+    try { r = await fetch('/api/admin?acao=' + acao, opcoes); } catch (e) {
+      throw Object.assign(new Error('Sem conexão com o site. Confira a internet e tente de novo.'), { status: 0 });
     }
-    return r.status === 204 ? null : r.json();
+    let j = null;
+    try { j = await r.json(); } catch (e) { /* resposta sem JSON */ }
+    if (!r.ok || !j) throw Object.assign(new Error((j && j.erro) || `O site respondeu com erro (${r.status}). Tente de novo.`), { status: r.status });
+    return j;
   }
 
-  async function lerDadosGithub() {
-    const caminho = prefixo() + 'js/dados.js';
-    const r = await api('GET', `${rotaRepo()}/contents/${caminhoUrl(caminho)}?ref=${encodeURIComponent(E.gh.branch)}`);
-    if (!r || typeof r.content !== 'string') throw new Error('Não consegui ler o arquivo js/dados.js no GitHub.');
-    return { dados: lerArquivoDados(base64ParaUtf8(r.content)), sha: r.sha };
-  }
-
-  /** Publica dados.js e as imagens novas em um único commit */
-  async function publicarGithub() {
-    const remoto = await api('GET', `${rotaRepo()}/contents/${caminhoUrl(prefixo() + 'js/dados.js')}?ref=${encodeURIComponent(E.gh.branch)}`);
-    if (remoto.sha !== E.shaDados) {
-      const seguir = window.confirm('O site foi alterado em outro lugar (outro aparelho ou direto no GitHub) depois que você abriu o painel.\n\nPublicar mesmo assim vai substituir essas alterações. Continuar?');
-      if (!seguir) return false;
-    }
-    const ref = await api('GET', `${rotaRepo()}/git/ref/heads/${caminhoUrl(E.gh.branch)}`);
-    const commitAtual = await api('GET', `${rotaRepo()}/git/commits/${ref.object.sha}`);
-
-    const usadas = imagensUsadas();
-    const arquivos = Object.keys(E.pendentes)
-      .filter((cam) => usadas.has(cam))
-      .map((cam) => ({ caminho: cam, base64: E.pendentes[cam].split(',')[1] }));
-    arquivos.push({ caminho: 'js/dados.js', base64: utf8ParaBase64(gerarArquivoDados(E.dados)) });
-
-    const itens = [];
-    let shaNovoDados = null;
-    for (let i = 0; i < arquivos.length; i++) {
-      carregando(`Enviando ${i + 1} de ${arquivos.length}…`);
-      const blob = await api('POST', `${rotaRepo()}/git/blobs`, { content: arquivos[i].base64, encoding: 'base64' });
-      itens.push({ path: prefixo() + arquivos[i].caminho, mode: '100644', type: 'blob', sha: blob.sha });
-      if (arquivos[i].caminho === 'js/dados.js') shaNovoDados = blob.sha;
-    }
-    carregando('Publicando…');
-    const arvore = await api('POST', `${rotaRepo()}/git/trees`, { base_tree: commitAtual.tree.sha, tree: itens });
-    const qtdImgs = arquivos.length - 1;
-    const commit = await api('POST', `${rotaRepo()}/git/commits`, {
-      message: 'Atualiza o site pelo painel' + (qtdImgs ? ` (${qtdImgs} imagem${qtdImgs > 1 ? 'ns' : ''} nova${qtdImgs > 1 ? 's' : ''})` : ''),
-      tree: arvore.sha,
-      parents: [ref.object.sha]
-    });
-    await api('PATCH', `${rotaRepo()}/git/refs/heads/${caminhoUrl(E.gh.branch)}`, { sha: commit.sha });
-    E.shaDados = shaNovoDados;
-    return true;
+  /** Envia uma imagem já convertida e devolve o endereço dela no site */
+  async function enviarImagem(nome, dataUrl) {
+    const r = await srv('imagem', { nome, dataUrl });
+    return r.src;
   }
 
   /* =========================================================== imagens */
-  function imagensUsadas() {
-    const s = new Set();
-    ['imagemComputador', 'imagemCelular'].forEach((k) => (E.dados.hero[k].versoes || []).forEach((v) => s.add(v.src)));
-    E.dados.produtos.forEach((p) => { if (p.imagem) s.add(p.imagem); });
-    return s;
-  }
-  function resolver(src) {
-    if (!src) return '';
-    return E.pendentes[src] || E.cacheImgs[src] || src;
-  }
+  const resolver = (src) => src || '';
   const maiorVersao = (img) => (img && img.versoes && img.versoes.length ? img.versoes[img.versoes.length - 1].src : '');
 
   function carregarImagem(arquivo) {
@@ -305,8 +213,8 @@
   }
 
   function precisaConexao() {
-    if (E.modo === 'github') return false;
-    aviso('Para enviar imagens, conecte o painel ao GitHub. Sem conexão, cole o link de uma imagem.', 5200);
+    if (E.modo === 'servidor') return false;
+    aviso('Para enviar imagens, entre pelo site publicado (Área do proprietário). Aqui, cole o link de uma imagem.', 5600);
     return true;
   }
 
@@ -318,25 +226,23 @@
       const alvo = LARGURAS[campo];
       const maxima = Math.min(img.naturalWidth, alvo[alvo.length - 1]);
       const larguras = Array.from(new Set(alvo.filter((w) => w < maxima).concat([maxima]))).sort((a, b) => a - b);
-      const marca = Date.now().toString(36);
       const nome = campo === 'imagemComputador' ? 'topo-computador' : 'topo-celular';
       const versoes = [];
       let ultima;
-      larguras.forEach((w) => {
-        ultima = codificar(img, w, true);
-        const cam = `img/hero/${nome}-${marca}-${ultima.w}.${ultima.ext}`;
-        E.pendentes[cam] = ultima.dataUrl;
-        versoes.push({ src: cam, w: ultima.w });
-      });
+      for (let i = 0; i < larguras.length; i++) {
+        carregando(`Enviando a imagem (${i + 1} de ${larguras.length})…`);
+        ultima = codificar(img, larguras[i], true);
+        versoes.push({ src: await enviarImagem(nome, ultima.dataUrl), w: ultima.w });
+      }
       URL.revokeObjectURL(img.src);
       E.dados.hero[campo] = { versoes, largura: ultima.w, altura: ultima.h };
       alterou();
       renderImagensTopo();
       aviso(img.naturalWidth < (campo === 'imagemComputador' ? 1100 : 800)
         ? 'Imagem trocada, mas ela é pequena e pode perder nitidez. Se tiver, use uma maior.'
-        : 'Imagem trocada! Veja a prévia e publique.', 5200);
+        : 'Imagem trocada! Veja a prévia e clique em Publicar.', 5200);
     } catch (e) {
-      aviso(e.message, 5200);
+      tratarErro(e);
     } finally {
       pronto();
     }
@@ -350,51 +256,66 @@
     clearTimeout(rascunhoTimer);
     rascunhoTimer = setTimeout(salvarRascunho, 500);
   }
-  const chaveRascunho = () => (E.modo === 'github' ? `${E.gh.dono}/${E.gh.nome}@${E.gh.branch}/${E.gh.pasta}` : 'local');
+  const chaveRascunho = () => E.modo || 'local';
   function salvarRascunho() {
     if (!E.dados || !E.alterado) return;
-    const base = { chave: chaveRascunho(), sha: E.shaDados, dados: E.dados };
-    if (!gravar(CHAVE_RASCUNHO, Object.assign({ pendentes: E.pendentes }, base))) gravar(CHAVE_RASCUNHO, base);
+    gravar(CHAVE_RASCUNHO, { chave: chaveRascunho(), versao: E.versao, dados: E.dados });
   }
 
   function atualizarEstado() {
     $('#estado-alterado').hidden = !E.alterado;
     const pub = $('#botao-publicar');
-    pub.disabled = E.modo === 'github' && !E.alterado;
-    $('#texto-publicar').textContent = E.modo === 'github' ? 'Publicar' : 'Baixar dados.js';
-    $('#estado-conexao').textContent = E.modo === 'github'
-      ? `Conectado: ${E.gh.dono}/${E.gh.nome} · ${E.gh.branch}`
-      : 'Modo sem conexão';
+    pub.disabled = E.modo === 'servidor' && !E.alterado;
+    $('#texto-publicar').textContent = E.modo === 'servidor' ? 'Publicar' : 'Baixar dados.js';
+    $('#estado-conexao').textContent = E.modo === 'servidor' ? `Conectado: ${E.email}` : 'Modo sem conexão';
     $('#qtd-produtos').textContent = E.dados ? String(E.dados.produtos.length) : '';
   }
 
+  /** Mostra o erro; se a sessão caiu, volta para o login sem perder o rascunho */
+  function tratarErro(e) {
+    if (e && e.status === 401 && E.modo === 'servidor') {
+      salvarRascunho();
+      aviso('Sua sessão expirou. Entre de novo — suas alterações foram guardadas.', 6500);
+      E.modo = null;
+      mostrarEntrada('entrar');
+      return;
+    }
+    aviso((e && e.message) || 'Algo deu errado. Tente de novo.', 7000);
+  }
+
   /* ============================================================ telas */
-  function mostrarEntrada(erro) {
+  /** Telas de entrada: 'checando', 'entrar', 'criar', 'criar-nova' ou 'sem-servidor' */
+  function mostrarEntrada(tela, erro) {
     $('#tela-painel').hidden = true;
     $('#tela-entrada').hidden = false;
-    const conf = ler(CHAVE_CONEXAO) || {};
-    const f = $('#form-entrada');
-    if (conf.repo) f.repo.value = conf.repo;
-    if (conf.branch) f.branch.value = conf.branch;
-    if (typeof conf.pasta === 'string') f.pasta.value = conf.pasta;
-    const msg = $('#erro-entrada');
-    msg.hidden = !erro;
-    msg.textContent = erro || '';
+    $('#entrada-checando').hidden = tela !== 'checando';
+    $('#form-entrar').hidden = tela !== 'entrar';
+    $('#form-criar').hidden = tela !== 'criar' && tela !== 'criar-nova';
+    $('#sem-servidor').hidden = tela !== 'sem-servidor';
+    $$('#tela-entrada .p-erro').forEach((n) => { n.hidden = true; n.textContent = ''; });
+    if (tela === 'criar' || tela === 'criar-nova') {
+      const nova = tela === 'criar-nova';
+      $('#criar-titulo').textContent = nova ? 'Criar uma nova senha' : 'Criar o acesso do proprietário';
+      $('#criar-texto').innerHTML = nova
+        ? 'Digite o seu e-mail, a nova senha e o <strong>código de ativação</strong>. A senha antiga deixa de funcionar.'
+        : 'Escolha o e-mail e a senha que você vai usar para entrar no painel. Só quem tem o <strong>código de ativação</strong> consegue criar o acesso.';
+      $('#criar-botao').textContent = nova ? 'Salvar nova senha e entrar' : 'Criar acesso e entrar';
+      $('#criar-voltar').hidden = !nova;
+    }
+    const form = tela === 'entrar' ? $('#form-entrar') : (tela === 'criar' || tela === 'criar-nova') ? $('#form-criar') : null;
+    if (form && erro) { const m = $('.p-erro', form); m.textContent = erro; m.hidden = false; }
+    if (form) setTimeout(() => { const c = $('input:not([type=hidden])', form); if (c && !c.value) c.focus(); }, 30);
   }
 
   function abrirPainel(dados) {
     E.dados = normalizar(dados);
-    E.pendentes = {};
     E.alterado = false;
     const r = ler(CHAVE_RASCUNHO);
     if (r && r.chave === chaveRascunho() && r.dados && JSON.stringify(normalizar(r.dados)) !== JSON.stringify(E.dados)) {
       if (window.confirm('Você tem alterações que ainda não publicou. Quer continuar de onde parou?')) {
         E.dados = normalizar(r.dados);
-        E.pendentes = r.pendentes || {};
         E.alterado = true;
-        if (r.sha && E.shaDados && r.sha !== E.shaDados) {
-          aviso('Atenção: o site mudou depois desse rascunho. Ao publicar, o rascunho substitui a versão atual.', 6500);
-        }
+        if (r.versao !== E.versao) aviso('Atenção: o site mudou depois desse rascunho. Ao publicar, o rascunho substitui a versão atual.', 6500);
       } else {
         apagar(CHAVE_RASCUNHO);
       }
@@ -583,7 +504,7 @@
     if (!titulo) marcarErro('titulo', 'Escreva o nome do produto.');
     if (!(preco > 0)) marcarErro('preco', 'Informe o preço atual (ex.: 379,90).');
     if (f.precoAntigo.value.trim() && !(antigo > preco)) marcarErro('precoAntigo', 'O preço antigo precisa ser maior que o atual (ou deixe vazio).');
-    if (imagem && !/^(https?:\/\/|img\/)/i.test(imagem)) erros.push('O link da foto precisa começar com https://');
+    if (imagem && !/^(https?:\/\/|img\/|\/api\/img\?p=)/i.test(imagem)) erros.push('O link da foto precisa começar com https://');
     if (f.avaliacao.value.trim() && !(nota >= 0 && nota <= 5)) erros.push('A nota vai de 0 a 5 (ex.: 4,8).');
 
     const p = { titulo, categoria: f.categoria.value, preco: Math.round(preco * 100) / 100 };
@@ -626,18 +547,16 @@
   async function enviarFotoProduto(arquivo) {
     if (precisaConexao()) return;
     try {
-      carregando('Preparando a foto…');
+      carregando('Enviando a foto…');
       const img = await carregarImagem(arquivo);
       const r = codificar(img, 800, false);
       URL.revokeObjectURL(img.src);
       const nome = slug(formProduto().titulo.value || arquivo.name.replace(/\.[^.]+$/, ''));
-      const cam = `img/produtos/${nome}-${Date.now().toString(36)}.${r.ext}`;
-      E.pendentes[cam] = r.dataUrl;
-      formProduto().imagem.value = cam;
+      formProduto().imagem.value = await enviarImagem(nome, r.dataUrl);
       atualizarPreviaEditor();
-      aviso('Foto pronta! Ela vai junto quando você publicar.');
+      aviso('Foto enviada! Agora é só salvar o produto.');
     } catch (e) {
-      aviso(e.message, 5200);
+      tratarErro(e);
     } finally {
       pronto();
     }
@@ -736,20 +655,9 @@
   }
 
   /* ============================================================ prévia */
-  function dadosParaPrevia() {
-    const d = clonar(E.dados);
-    ['imagemComputador', 'imagemCelular'].forEach((k) => d.hero[k].versoes.forEach((v) => { v.src = resolver(v.src); }));
-    d.produtos.forEach((p) => { if (p.imagem) p.imagem = resolver(p.imagem); });
-    return d;
-  }
   function abrirPrevia() {
     const janela = window.open('', 'achados-previa');
-    let d = dadosParaPrevia();
-    if (!gravar(CHAVE_PREVIA, d)) {
-      d = clonar(E.dados);  // sem as imagens novas, que não couberam no armazenamento
-      gravar(CHAVE_PREVIA, d);
-      aviso('A prévia abriu sem as imagens novas (são grandes demais para a prévia). Elas aparecem depois de publicar.', 6500);
-    }
+    if (!gravar(CHAVE_PREVIA, E.dados)) aviso('Não consegui abrir a prévia neste navegador.', 5000);
     const url = 'index.html?previa=1';
     if (janela) janela.location.href = url; else window.location.href = url;
   }
@@ -764,7 +672,7 @@
   }
 
   async function publicar() {
-    if (E.modo !== 'github') {
+    if (E.modo !== 'servidor') {
       baixarArquivo();
       aviso('Arquivo baixado! Envie para a hospedagem na pasta js/, substituindo o dados.js.', 7000);
       return;
@@ -774,79 +682,102 @@
     if (exemplos && !window.confirm(`${exemplos} produto${exemplos > 1 ? 's ainda estão' : ' ainda está'} sem o seu link de afiliado (aparece${exemplos > 1 ? 'm' : ''} como “Exemplo”). Publicar mesmo assim?`)) return;
     try {
       carregando('Publicando…');
-      const feito = await publicarGithub();
-      if (!feito) return;
-      Object.assign(E.cacheImgs, E.pendentes);
-      E.pendentes = {};
+      let r;
+      try {
+        r = await srv('salvar', { dados: E.dados, versaoBase: E.versao });
+      } catch (e) {
+        if (e.status !== 409) throw e;
+        pronto();
+        if (!window.confirm('O site foi alterado em outro aparelho depois que você abriu o painel.\n\nPublicar mesmo assim vai substituir essas alterações. Continuar?')) return;
+        carregando('Publicando…');
+        r = await srv('salvar', { dados: E.dados, versaoBase: E.versao, forcar: true });
+      }
+      E.versao = r.versao || null;
       E.alterado = false;
       apagar(CHAVE_RASCUNHO);
       atualizarEstado();
-      aviso('Publicado! O site atualiza sozinho em 1 a 2 minutos.', 6500);
+      aviso('Publicado! O site já está atualizado.', 6000);
     } catch (e) {
-      aviso(e.message, 8000);
-      if (e.status === 401) setTimeout(() => sair(true), 1500);
+      tratarErro(e);
     } finally {
       pronto();
     }
   }
 
-  function sair(semPerguntar) {
+  async function sair(semPerguntar) {
     if (!semPerguntar && E.alterado && !window.confirm('Você tem alterações não publicadas. Elas ficam guardadas neste aparelho como rascunho. Sair mesmo assim?')) return;
     salvarRascunho();
-    apagar(CHAVE_TOKEN);
-    E.modo = null; E.gh = null; E.dados = null; E.alterado = false;
-    mostrarEntrada();
+    if (E.modo === 'servidor') { try { await srv('sair', {}); } catch (e) { /* já saiu */ } }
+    E.modo = null; E.dados = null; E.alterado = false;
+    mostrarEntrada(E.temServidor ? 'entrar' : 'sem-servidor');
   }
 
   /* ============================================================ entrada */
-  function lerRepo(texto) {
-    const t = String(texto || '').trim().replace(/\.git$/, '').replace(/\/+$/, '');
-    const m = t.match(/(?:github\.com[/:])?([\w.-]+)\/([\w.-]+)$/i);
-    return m ? { dono: m[1], nome: m[2] } : null;
-  }
-
-  async function entrarGithub(conf, token) {
-    E.modo = 'github';
-    E.gh = Object.assign({ token }, conf);
-    carregando('Conectando ao GitHub…');
+  async function entrarNoServidor() {
+    carregando('Abrindo o painel…');
     try {
-      const r = await lerDadosGithub();
-      E.shaDados = r.sha;
+      const r = await srv('dados');
+      E.modo = 'servidor';
+      E.email = r.email;
+      E.versao = r.versao || null;
       abrirPainel(r.dados);
-      return true;
-    } catch (e) {
-      E.modo = null; E.gh = null;
-      mostrarEntrada(e.message);
-      return false;
     } finally {
       pronto();
     }
   }
 
+  function erroNoForm(form, msg) {
+    const m = $('.p-erro', form);
+    m.textContent = msg;
+    m.hidden = false;
+  }
+
   function ligarEntrada() {
-    const f = $('#form-entrada');
-    f.addEventListener('submit', async (ev) => {
+    const fEntrar = $('#form-entrar');
+    fEntrar.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const repo = lerRepo(f.repo.value);
-      const token = f.token.value.trim();
-      const branch = f.branch.value.trim() || 'main';
-      const pasta = f.pasta.value.trim().replace(/^\/+|\/+$/g, '');
-      const erro = $('#erro-entrada');
-      if (!token) { erro.textContent = 'Cole o token do GitHub.'; erro.hidden = false; return; }
-      if (!repo) { erro.textContent = 'Escreva o repositório no formato usuario/repositorio.'; erro.hidden = false; return; }
-      const conf = { dono: repo.dono, nome: repo.nome, branch, pasta };
-      const ok = await entrarGithub(conf, token);
-      if (ok) {
-        gravar(CHAVE_CONEXAO, { repo: `${repo.dono}/${repo.nome}`, branch, pasta });
-        apagar(CHAVE_TOKEN);
-        gravar(CHAVE_TOKEN, token, !f.lembrar.checked);
-        f.token.value = '';
+      const email = fEntrar.email.value.trim(), senha = fEntrar.senha.value;
+      if (!email || !senha) { erroNoForm(fEntrar, 'Digite o e-mail e a senha.'); return; }
+      const botao = $('button[type=submit]', fEntrar);
+      botao.disabled = true;
+      try {
+        await srv('entrar', { email, senha });
+        fEntrar.senha.value = '';
+        await entrarNoServidor();
+      } catch (e) {
+        erroNoForm(fEntrar, e.message);
+      } finally {
+        botao.disabled = false;
       }
     });
+
+    const fCriar = $('#form-criar');
+    fCriar.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const email = fCriar.email.value.trim(), senha = fCriar.senha.value, senha2 = fCriar.senha2.value, codigo = fCriar.codigo.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { erroNoForm(fCriar, 'Digite um e-mail válido.'); return; }
+      if (senha.length < 8 || !/[a-zA-Z]/.test(senha) || !/\d/.test(senha)) { erroNoForm(fCriar, 'A senha precisa ter pelo menos 8 caracteres, com letras e números.'); return; }
+      if (senha !== senha2) { erroNoForm(fCriar, 'As duas senhas não estão iguais.'); return; }
+      if (!codigo) { erroNoForm(fCriar, 'Digite o código de ativação.'); return; }
+      const botao = $('#criar-botao');
+      botao.disabled = true;
+      try {
+        await srv('criar', { email, senha, codigo });
+        fCriar.reset();
+        await entrarNoServidor();
+        aviso('Acesso criado! Guarde bem o seu e-mail e a sua senha.', 6000);
+      } catch (e) {
+        erroNoForm(fCriar, e.message);
+      } finally {
+        botao.disabled = false;
+      }
+    });
+
+    $$('[data-ir]').forEach((b) => b.addEventListener('click', () => mostrarEntrada(b.getAttribute('data-ir'))));
+
     $('#botao-local').addEventListener('click', () => {
       E.modo = 'local';
-      E.gh = null;
-      E.shaDados = null;
+      E.versao = null;
       abrirPainel(window.ACHADOS_DADOS || {});
       aviso('Modo sem conexão: ao terminar, use “Baixar dados.js”.', 5200);
     });
@@ -869,7 +800,7 @@
     // Sem conexão não dá para enviar arquivos: avisa antes de abrir o seletor
     document.addEventListener('click', (ev) => {
       const rotulo = ev.target.closest('.p-btn--arquivo');
-      if (rotulo && E.modo !== 'github') { ev.preventDefault(); precisaConexao(); }
+      if (rotulo && E.modo !== 'servidor') { ev.preventDefault(); precisaConexao(); }
     }, true);
 
     // Imagens do topo
@@ -958,13 +889,20 @@
   async function iniciar() {
     ligarEntrada();
     ligarPainel();
-    const conf = ler(CHAVE_CONEXAO);
-    const token = ler(CHAVE_TOKEN) || ler(CHAVE_TOKEN, true);
-    const repo = conf && lerRepo(conf.repo);
-    if (conf && repo && token) {
-      await entrarGithub({ dono: repo.dono, nome: repo.nome, branch: conf.branch || 'main', pasta: conf.pasta || '' }, token);
+    mostrarEntrada('checando');
+    let estado;
+    try {
+      estado = await srv('estado');
+      E.temServidor = true;
+    } catch (e) {
+      E.temServidor = false;
+      mostrarEntrada('sem-servidor');
+      return;
+    }
+    if (estado.logado) {
+      try { await entrarNoServidor(); } catch (e) { mostrarEntrada('entrar', e.message); }
     } else {
-      mostrarEntrada();
+      mostrarEntrada(estado.configurado ? 'entrar' : 'criar');
     }
   }
 

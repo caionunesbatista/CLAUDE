@@ -126,48 +126,57 @@
         </div>
       </div>
 
-      <form class="entrada__form" id="form-entrada" autocomplete="off">
-        <p class="entrada__texto">Para publicar direto no site, conecte o painel ao repositório do GitHub onde o site está. Isso é feito uma vez só neste aparelho.</p>
-        <label class="p-campo">
-          <span>Token do GitHub</span>
-          <input name="token" type="password" placeholder="github_pat_..." required autocomplete="off" spellcheck="false">
-        </label>
-        <label class="p-campo">
-          <span>Repositório</span>
-          <input name="repo" type="text" placeholder="usuario/repositorio" required spellcheck="false" autocapitalize="off">
-        </label>
-        <div class="p-duas">
-          <label class="p-campo">
-            <span>Branch</span>
-            <input name="branch" type="text" value="main" required spellcheck="false" autocapitalize="off">
-          </label>
-          <label class="p-campo">
-            <span>Pasta do site</span>
-            <input name="pasta" type="text" value="achados-do-ml" spellcheck="false" autocapitalize="off">
-          </label>
-        </div>
-        <label class="p-marca">
-          <input name="lembrar" type="checkbox" checked> Lembrar neste aparelho
-        </label>
-        <p class="p-erro" id="erro-entrada" role="alert" hidden></p>
-        <button class="p-btn p-btn--primario p-btn--largo" type="submit" id="botao-conectar">Conectar e abrir o painel</button>
+      <p class="entrada__checando" id="entrada-checando">Verificando o acesso…</p>
 
-        <details class="entrada__ajuda">
-          <summary>Como criar o token (2 minutos)</summary>
-          <ol>
-            <li>Entre no GitHub e abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Settings → Developer settings → Fine-grained tokens → Generate new token</a>.</li>
-            <li>Dê um nome (ex.: <em>Painel Achados</em>) e escolha a validade.</li>
-            <li>Em <strong>Repository access</strong>, marque <em>Only select repositories</em> e escolha o repositório do site.</li>
-            <li>Em <strong>Permissions → Repository permissions → Contents</strong>, escolha <em>Read and write</em>.</li>
-            <li>Clique em <strong>Generate token</strong>, copie o código (começa com <code>github_pat_</code>) e cole aqui.</li>
-          </ol>
-          <p>O token fica guardado só neste navegador. Ninguém mais consegue publicar sem ele.</p>
-        </details>
+      <!-- Entrar -->
+      <form class="entrada__form" id="form-entrar" hidden novalidate>
+        <h2 class="entrada__h2">Área do proprietário</h2>
+        <label class="p-campo">
+          <span>E-mail</span>
+          <input name="email" type="email" autocomplete="username" inputmode="email" required spellcheck="false" autocapitalize="off">
+        </label>
+        <label class="p-campo">
+          <span>Senha</span>
+          <input name="senha" type="password" autocomplete="current-password" required>
+        </label>
+        <p class="p-erro" role="alert" hidden></p>
+        <button class="p-btn p-btn--primario p-btn--largo" type="submit">Entrar</button>
+        <button class="entrada__link" type="button" data-ir="criar-nova">Esqueci minha senha</button>
       </form>
 
-      <div class="entrada__ou"><span>ou</span></div>
-      <button class="p-btn p-btn--largo" type="button" id="botao-local">Usar sem conectar</button>
-      <p class="entrada__nota">Sem conexão você edita e vê a prévia, mas para publicar precisa baixar o arquivo <code>dados.js</code> e enviar para a hospedagem.</p>
+      <!-- Criar acesso (primeira vez) ou nova senha -->
+      <form class="entrada__form" id="form-criar" hidden novalidate>
+        <h2 class="entrada__h2" id="criar-titulo">Criar o acesso do proprietário</h2>
+        <p class="entrada__texto" id="criar-texto">Escolha o e-mail e a senha que você vai usar para entrar no painel. Só quem tem o <strong>código de ativação</strong> consegue criar o acesso.</p>
+        <label class="p-campo">
+          <span>E-mail</span>
+          <input name="email" type="email" autocomplete="username" inputmode="email" required spellcheck="false" autocapitalize="off">
+        </label>
+        <label class="p-campo">
+          <span>Senha</span>
+          <input name="senha" type="password" autocomplete="new-password" required minlength="8">
+          <small>Pelo menos 8 caracteres, com letras e números.</small>
+        </label>
+        <label class="p-campo">
+          <span>Repita a senha</span>
+          <input name="senha2" type="password" autocomplete="new-password" required>
+        </label>
+        <label class="p-campo">
+          <span>Código de ativação</span>
+          <input name="codigo" type="text" required spellcheck="false" autocapitalize="characters" autocomplete="off" placeholder="XXXX-XXXX-XXXX">
+        </label>
+        <p class="p-erro" role="alert" hidden></p>
+        <button class="p-btn p-btn--primario p-btn--largo" type="submit" id="criar-botao">Criar acesso e entrar</button>
+        <button class="entrada__link" type="button" data-ir="entrar" id="criar-voltar" hidden>Voltar para o login</button>
+      </form>
+
+      <!-- Sem servidor (arquivo aberto no computador, por exemplo) -->
+      <div class="entrada__form" id="sem-servidor" hidden>
+        <h2 class="entrada__h2">Painel fora do ar aqui</h2>
+        <p class="entrada__texto">O login do proprietário funciona no site publicado. Aqui você ainda pode editar, ver a prévia e baixar o arquivo <code>dados.js</code>.</p>
+        <button class="p-btn p-btn--largo" type="button" id="botao-local">Usar sem conectar</button>
+      </div>
+
       <a class="entrada__voltar" href="index.html">← Voltar ao site</a>
     </div>
   </section>
