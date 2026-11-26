@@ -1,0 +1,10 @@
+node_modules
+dist
+# Banco de dados local (NUNCA suba para o Git: tem dados e saldos dos jogadores)
+data
+*.db
+*.db-wal
+*.db-shm
+.env
+*.log
+.DS_Store

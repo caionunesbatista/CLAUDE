@@ -1,0 +1,35 @@
+{
+  "name": "zap-arena",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Plataforma de truco online com mesas valendo, salas de duplas com prêmio configurável e comissão da casa.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:servidor": "node --watch --disable-warning=ExperimentalWarning server/index.js",
+    "dev:site": "vite",
+    "build": "vite build",
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"test/*.test.js\"",
+    "admin": "node --disable-warning=ExperimentalWarning server/scripts/admin.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "lucide-react": "^1.80.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^8.5.3",
+    "socket.io": "^4.8.4",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^6.3.0",
+    "socket.io-client": "^4.8.4",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
+  }
+}
