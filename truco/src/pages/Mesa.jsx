@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ArrowLeft, Share2, MessageCircle, EyeOff, Eye, WifiOff, Trophy, Frown, LogOut, Armchair, Crown, Volume2, VolumeX, Smile, Hand, Moon, Sun, RotateCcw } from 'lucide-react'
-import { obterSocket, emitir } from '../lib/socket.js'
+import { obterSocket, emitir as emitirSocket } from '../lib/socket.js'
 import { api } from '../lib/api.js'
 import { useSessao, avisar } from '../store/sessao.js'
 import { formatarReais, copiar } from '../lib/formato.js'
@@ -142,7 +142,7 @@ function Assento({ info, posicao, eAVez, fracao, carteador, qtdCartas, frase, si
           </span>
         )}
       </div>
-      <div className="-mt-1.5 flex max-w-[132px] items-center gap-1 rounded-md border border-white/10 bg-[#060b19]/85 px-2 py-0.5 shadow-lg">
+      <div className={`-mt-1.5 flex ${compacto ? 'max-w-[104px]' : 'max-w-[132px]'} items-center gap-1 rounded-md border border-white/10 bg-[#060b19]/85 px-2 py-0.5 shadow-lg`}>
         <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: cor }} />
         <span className="truncate font-display text-sm font-bold uppercase tracking-wide text-white">{info.apelido}</span>
         {compacto && qtdCartas > 0 && <span className="numero font-display text-sm font-bold text-white/50">·{qtdCartas}</span>}
@@ -397,14 +397,52 @@ function VotacaoFerro({ mao, mesa, podeVotar, enviando, aoVotar }) {
   )
 }
 
-// ---------- página ----------
+// ---------- layout calculado pelo tamanho real do feltro ----------
 
-export default function Mesa() {
-  const { id } = useParams()
-  const navegar = useNavigate()
-  const { mesa, erro, sinal, reacoes, desvio } = useMesa(id)
+/** Mede um elemento (largura e altura) e acompanha mudanças de tamanho. */
+function useMedida() {
+  const [no, setNo] = useState(null)
+  const [medida, setMedida] = useState({ w: 0, h: 0 })
+  useEffect(() => {
+    if (!no) return
+    const ler = () => setMedida({ w: no.clientWidth, h: no.clientHeight })
+    ler()
+    const ro = new ResizeObserver(ler)
+    ro.observe(no)
+    return () => ro.disconnect()
+  }, [no])
+  return [setNo, medida]
+}
+
+/**
+ * Onde fica cada coisa na mesa, a partir do tamanho do feltro.
+ * Reserva faixas para os assentos (topo e laterais) e para os botões do canto,
+ * e dimensiona as cartas da vaza para caberem no espaço livre sem encostar em nada.
+ */
+export function calcularLayout(W, H, n) {
+  const largo = W >= 620
+  const zonaTopo = largo ? 124 : 100
+  const zonaBaixo = 58
+  const zonaLado = n === 4 && largo ? 168 : 12
+  const aw = Math.max(80, W - 2 * zonaLado)
+  const ah = Math.max(80, H - zonaTopo - zonaBaixo)
+  const cx = W / 2
+  const cy = zonaTopo + ah / 2
+  let h = Math.min(176, ah / 2)
+  if (n === 4) h = Math.min(h, aw / (3 * 0.714 + 0.35))
+  h = Math.max(58, h)
+  const w = h * 0.714
+  const dy = Math.max(0, Math.min((ah - h) / 2, h * 0.52))
+  const dx = n === 4 ? Math.max(w, Math.min((aw - w) / 2, w * 1.3)) : 0
+  return { largo, cx, cy, w, h, dx, dy, W, H }
+}
+
+// ---------- tela da mesa (usada pelo site e pelo modo de treino offline) ----------
+
+export function MesaTela({ id, mesa, erro, sinal, reacoes, desvio, emitir, post, navegar, classeAltura = 'h-dvh' }) {
   const agora = useRelogio()
   const { largura, altura } = useTela()
+  const [refFeltro, feltro] = useMedida()
   const [enviando, setEnviando] = useState(false)
   const [esconder, setEsconder] = useState(false)
   const [painel, setPainel] = useState(null) // 'reacoes' | 'frases' | 'sinais'
@@ -429,10 +467,10 @@ export default function Mesa() {
   const asCegas = Boolean(mao?.minhasCartas?.[0]?.oculta)
 
   const compacto = altura < 720 || largura < 380
-  // Tamanhos pela tela: nada pode encostar nos jogadores sentados.
-  const tamanhoMesa = compacto ? 'pequena' : largura < 768 || altura < 900 ? 'media' : 'grande'
-  const larguraMao = compacto ? 70 : altura < 900 ? 92 : 108
-  const deslocamento = { pequena: [60, 40], media: [80, 54], grande: [104, 76] }[tamanhoMesa]
+  const larguraMao = compacto ? 74 : altura < 900 ? 96 : 112
+  const layout = calcularLayout(feltro.w, feltro.h, n)
+  // Em telas estreitas os assentos ficam todos na faixa de cima (sem leque de cartas).
+  const assentoCompacto = compacto || !layout.largo
 
   // Gritos, sons e resultado de cada mão.
   useEffect(() => {
@@ -488,13 +526,13 @@ export default function Mesa() {
       if (r.erro) avisar.erro(r.erro)
       return !r.erro
     },
-    [id],
+    [id, emitir],
   )
 
   async function chamarApi(caminho, corpo, sucesso) {
     setOcupado(true)
     try {
-      const r = await api.post(caminho, corpo)
+      const r = await post(caminho, corpo)
       if (sucesso) sucesso(r)
     } catch (e) {
       avisar.erro(e.message)
@@ -579,15 +617,24 @@ export default function Mesa() {
     navegar(mesa.torneio ? `/sala/${mesa.torneio.id}` : '/jogar')
   }
 
+  // Ponto de onde sobe a reação de cada jogador.
   const posicaoReacao = (assento) => {
     const pos = posicaoRelativa(assento, base, n)
-    return { baixo: { left: '50%', bottom: '14%' }, cima: { left: '50%', top: '22%' }, esquerda: { left: '14%', top: '50%' }, direita: { left: '86%', top: '50%' } }[pos]
+    const L = layout
+    const pontos = {
+      baixo: [L.cx, L.H - 80],
+      cima: [L.cx, 70],
+      esquerda: L.largo ? [90, L.cy] : [60, 70],
+      direita: L.largo ? [L.W - 90, L.cy] : [L.W - 60, 70],
+    }
+    const [x, y] = pontos[pos]
+    return { left: x, top: y }
   }
 
   const valorBase = variante.escada[0]
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[radial-gradient(120%_80%_at_50%_30%,#0d1a3a,#05080f)]">
+    <div className={`flex ${classeAltura} flex-col overflow-hidden bg-[radial-gradient(120%_80%_at_50%_30%,#0d1a3a,#05080f)]`}>
       {/* ───── Barra superior ───── */}
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 bg-[#060b19]/80 px-2 sm:px-4">
         <button className="grid h-10 w-10 place-items-center rounded-lg text-suave hover:bg-white/5 hover:text-white" onClick={sair} aria-label="Sair da mesa">
@@ -657,11 +704,16 @@ export default function Mesa() {
       )}
 
       {/* ───── Mesa ───── */}
-      <main className="relative min-h-0 flex-1 p-2 sm:p-4">
-        <div className="borda-mesa relative mx-auto h-full w-full max-w-5xl rounded-[34px] p-[7px] sm:rounded-[56px] sm:p-[12px]">
-          <div className="feltro relative h-full w-full overflow-hidden rounded-[28px] sm:rounded-[46px]">
-            <div className="costura pointer-events-none absolute inset-2 rounded-[24px] sm:inset-3 sm:rounded-[40px]" />
-            <p className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center font-display text-3xl font-extrabold uppercase italic tracking-[0.35em] text-white/[0.06] sm:text-5xl">{site.nome}</p>
+      <main className="relative min-h-0 flex-1 p-1.5 sm:p-3">
+        <div className="borda-mesa relative mx-auto h-full w-full max-w-[1500px] rounded-[30px] p-[5px] sm:rounded-[60px] sm:p-[10px]">
+          <div ref={refFeltro} className="feltro relative h-full w-full overflow-hidden rounded-[26px] sm:rounded-[52px]">
+            <div className="costura pointer-events-none absolute inset-2 rounded-[22px] sm:inset-3 sm:rounded-[46px]" />
+            <p
+              className="pointer-events-none absolute inset-x-0 -translate-y-1/2 text-center font-display text-3xl font-extrabold uppercase italic tracking-[0.35em] text-white/[0.06] sm:text-6xl"
+              style={{ top: layout.cy }}
+            >
+              {site.nome}
+            </p>
 
             {mao?.especial && (
               <div className="absolute bottom-3 left-3 z-10 whitespace-nowrap rounded-md sm:bottom-5 sm:left-5 bg-[#060b19]/70 px-3 py-1 font-display text-sm font-bold uppercase tracking-widest text-ouro">
@@ -674,14 +726,15 @@ export default function Mesa() {
               const assento = assentoPos(pos)
               if (assento < 0) return null
               const info = mesa.assentos[assento]
-              // No celular os laterais sobem um pouco para não encostar nas cartas da vaza.
+              // Mesa larga: laterais na altura das cartas. Estreita (celular): todos na faixa de cima.
               const estilo = {
-                cima: 'left-1/2 top-2 -translate-x-1/2 sm:top-3',
-                esquerda: 'left-2 top-[11%] sm:left-6 sm:top-1/2 sm:-translate-y-1/2',
-                direita: 'right-2 top-[11%] sm:right-6 sm:top-1/2 sm:-translate-y-1/2',
+                cima: 'left-1/2 top-2.5 -translate-x-1/2 sm:top-3',
+                esquerda: layout.largo ? 'left-5 -translate-y-1/2' : 'left-2.5 top-2.5',
+                direita: layout.largo ? 'right-5 -translate-y-1/2' : 'right-2.5 top-2.5',
               }[pos]
+              const topoLateral = layout.largo && pos !== 'cima' ? { top: layout.cy } : undefined
               return (
-                <div key={pos} className={`absolute z-10 ${estilo}`}>
+                <div key={pos} className={`absolute z-10 ${estilo}`} style={topoLateral}>
                   {info ? (
                     <Assento
                       info={info}
@@ -693,7 +746,7 @@ export default function Mesa() {
                       frase={fraseRecente(assento)}
                       sinal={assento === parceiroAssento ? sinalAtivo : null}
                       meuTime={meuTime}
-                      compacto={compacto}
+                      compacto={assentoCompacto}
                     />
                   ) : (
                     <div className="grid h-14 w-14 place-items-center rounded-full border-2 border-dashed border-white/25 font-display text-xs font-bold uppercase text-white/50">livre</div>
@@ -703,11 +756,11 @@ export default function Mesa() {
             })}
 
             {/* Cartas na mesa */}
-            {(jogando || mesa.status === 'encerrada') && (
-              <div className="absolute left-1/2 top-1/2 h-0 w-0">
+            {(jogando || mesa.status === 'encerrada') && feltro.w > 0 && (
+              <div className="absolute h-0 w-0" style={{ left: layout.cx, top: layout.cy }}>
                 {naMesa.jogadas.map((j) => {
                   const pos = posicaoRelativa(j.assento, base, n)
-                  const [dx, dy] = { baixo: [0, deslocamento[1]], cima: [0, -deslocamento[1]], esquerda: [-deslocamento[0], 0], direita: [deslocamento[0], 0] }[pos]
+                  const [dx, dy] = { baixo: [0, layout.dy], cima: [0, -layout.dy], esquerda: [-layout.dx, 0], direita: [layout.dx, 0] }[pos]
                   const venceu = naMesa.fechada && naMesa.fechada.vencedorAssento === j.assento
                   const apagada = naMesa.fechada && !venceu
                   return (
@@ -717,7 +770,7 @@ export default function Mesa() {
                       style={{ left: dx, top: dy, '--de-x': ORIGEM[pos][0], '--de-y': ORIGEM[pos][1], '--rot': `${ROTACAO[pos]}deg`, '--rot-de': `${ROTACAO[pos] * 3}deg` }}
                     >
                       <div className="relative" style={{ transform: 'translate(-50%, -50%)' }}>
-                        <Carta carta={j.carta} oculta={j.coberta && !j.carta} tamanho={tamanhoMesa} variante={mesa.variante} manilha={mao?.manilha} apagada={apagada || (j.coberta && !!j.carta)} destaque={venceu} />
+                        <Carta carta={j.carta} oculta={j.coberta && !j.carta} largura={Math.round(layout.w)} variante={mesa.variante} manilha={mao?.manilha} apagada={apagada || (j.coberta && !!j.carta)} destaque={venceu} />
                         {j.coberta && (
                           <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded bg-[#060b19] px-1.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-wider text-white">Escondida</span>
                         )}
@@ -821,7 +874,7 @@ export default function Mesa() {
       {/* ───── Área do jogador ───── */}
       {mesa.meuAssento !== null && jogando && mao && (
         <footer className="shrink-0 border-t border-white/5 bg-[#060b19]/90 px-3 pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2">
-          <div className="mx-auto max-w-xl">
+          <div className="mx-auto max-w-xl sm:max-w-4xl">
             {/* Tempo */}
             <div className="mb-2 h-1 overflow-hidden rounded-full bg-white/10">
               {(acoes.jogar || acoes.responder || acoes.decidirOnze || acoes.votarFerro) && prazo && (
@@ -885,7 +938,20 @@ export default function Mesa() {
               {ehMinhaVez ? (asCegas ? 'Sua vez · escolha uma carta às cegas' : esconder ? 'Toque na carta para jogar escondida' : 'Sua vez · toque na carta') : status}
             </p>
 
-            {/* Minha mão: toque para jogar */}
+            {/* Minha mão (toque para jogar), com Esconder à esquerda e o pedido à direita no computador */}
+            <div className="sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-6">
+            <div className="hidden justify-end sm:flex">
+              {acoes.cobrir && !asCegas && (
+                <button
+                  className={`btn ${esconder ? 'bg-white text-[#060b19]' : 'btn-sec'}`}
+                  aria-pressed={esconder}
+                  onClick={() => setEsconder((v) => !v)}
+                  title="Ative e toque na carta: ela cai virada e não vale na vaza"
+                >
+                  {esconder ? <Eye size={18} /> : <EyeOff size={18} />} {esconder ? 'Não esconder' : 'Esconder'}
+                </button>
+              )}
+            </div>
             <div className="flex items-end justify-center pt-2" style={{ minHeight: Math.round((larguraMao * 280) / 200) + 12 }}>
               {mao.minhasCartas.map((c, i, lista) => {
                 const meio = (lista.length - 1) / 2
@@ -917,9 +983,18 @@ export default function Mesa() {
               })}
             </div>
 
-            {/* Ações: Esconder e o pedido (TRUCO!, SEIS!...) */}
+            <div className="hidden justify-start sm:flex">
+              {acoes.aumentar && mao.proximoPedido && jogo.fase === 'jogando' && (
+                <button className="btn btn-primario animar-vez min-h-[56px] min-w-[150px] px-7 text-3xl italic" disabled={enviando} onClick={() => agir({ tipo: 'aumentar' })}>
+                  {mao.proximoPedido.nome}!
+                </button>
+              )}
+            </div>
+            </div>
+
+            {/* Celular: Esconder e o pedido (TRUCO!, SEIS!...) embaixo das cartas */}
             {((acoes.cobrir && !asCegas) || (acoes.aumentar && mao.proximoPedido && jogo.fase === 'jogando')) && (
-              <div className="mt-3 flex items-center justify-center gap-2">
+              <div className="mt-3 flex items-center justify-center gap-2 sm:hidden">
                 {acoes.cobrir && !asCegas && (
                   <button
                     className={`btn ${esconder ? 'bg-white text-[#060b19]' : 'btn-sec'}`}
@@ -954,7 +1029,7 @@ export default function Mesa() {
           <button
             className="btn btn-primario flex-1"
             onClick={() => {
-              if (mesa.tipo === 'treino') api.post(`/mesas/${id}/sair`).catch(() => {})
+              if (mesa.tipo === 'treino') Promise.resolve(post(`/mesas/${id}/sair`, {})).catch(() => {})
               navegar(mesa.torneio ? `/sala/${mesa.torneio.id}` : '/jogar')
             }}
           >
@@ -964,4 +1039,12 @@ export default function Mesa() {
       </Modal>
     </div>
   )
+}
+
+/** Página da mesa no site: liga a tela ao servidor (tempo real + API). */
+export default function Mesa() {
+  const { id } = useParams()
+  const navegar = useNavigate()
+  const dados = useMesa(id)
+  return <MesaTela id={id} {...dados} emitir={emitirSocket} post={api.post} navegar={navegar} />
 }

@@ -121,6 +121,18 @@ Rode **uma única instância** do servidor (o estado das mesas fica na memória 
 
 ---
 
+## Mesa de treino offline (arquivo único)
+
+```bash
+npm run demo   # gera dist-demo/zap-arena-treino.html
+```
+
+Gera a mesa do site num único arquivo HTML que roda sem servidor: você contra o computador, com o mesmo
+motor de regras, os mesmos bots e o mesmo visual. Serve para testar a jogabilidade ou mostrar o jogo para
+alguém. Não tem contas, dinheiro nem jogo online — isso só existe no site com servidor.
+
+---
+
 ## Testes automáticos
 
 ```bash
