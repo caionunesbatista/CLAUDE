@@ -162,3 +162,30 @@ export const SINAIS = [
   'Tô sem nada',
   'Vai que é tua',
 ]
+
+/** Reações rápidas que sobem na mesa (efêmeras, não ficam gravadas). */
+export const REACOES = ['👏', '😂', '😱', '🔥', '😎', '🙏', '😤', '🤝']
+
+/** Avatares disponíveis: um símbolo sobre uma cor. O site desenha cada um. */
+export const AVATARES = [
+  { id: 'coroa', cor: '#e8283f' },
+  { id: 'raio', cor: '#f2c14e' },
+  { id: 'chama', cor: '#ff7a1a' },
+  { id: 'estrela', cor: '#3d8bff' },
+  { id: 'trevo', cor: '#1fbf75' },
+  { id: 'diamante', cor: '#38c6f4' },
+  { id: 'ancora', cor: '#6d5dfc' },
+  { id: 'foguete', cor: '#ff4fa3' },
+  { id: 'caveira', cor: '#9aa6c4' },
+  { id: 'coelho', cor: '#d9480f' },
+  { id: 'gato', cor: '#c2a878' },
+  { id: 'cachorro', cor: '#a0522d' },
+  { id: 'passaro', cor: '#14b8a6' },
+  { id: 'peixe', cor: '#2563eb' },
+  { id: 'fantasma', cor: '#b794f6' },
+  { id: 'trofeu', cor: '#eab308' },
+]
+
+export function avatarValido(id) {
+  return AVATARES.some((a) => a.id === id)
+}

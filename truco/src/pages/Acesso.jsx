@@ -76,13 +76,13 @@ export function Entrar() {
           <label className="rotulo" htmlFor="senha">Senha</label>
           <CampoSenha id="senha" valor={senha} aoMudar={setSenha} autoComplete="current-password" />
         </div>
-        <button className="btn btn-ouro btn-grande w-full" disabled={enviando}>
+        <button className="btn btn-primario btn-grande w-full" disabled={enviando}>
           {enviando ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-suave">
         Ainda não tem conta?{' '}
-        <Link className="font-semibold text-ouro hover:underline" to={`/cadastro${params.get('voltar') ? `?voltar=${encodeURIComponent(voltar)}` : ''}`}>
+        <Link className="font-semibold text-marca-forte hover:underline" to={`/cadastro${params.get('voltar') ? `?voltar=${encodeURIComponent(voltar)}` : ''}`}>
           Criar conta grátis
         </Link>
       </p>
@@ -148,14 +148,14 @@ export function Cadastro() {
           <CampoSenha id="senha-nova" valor={dados.senha} aoMudar={(senha) => setDados((d) => ({ ...d, senha }))} autoComplete="new-password" />
         </div>
         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-linha bg-fundo/60 p-3 text-sm">
-          <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-ouro)]" checked={aceite} onChange={(e) => setAceite(e.target.checked)} />
+          <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-marca)]" checked={aceite} onChange={(e) => setAceite(e.target.checked)} />
           <span className="text-suave">
             Tenho 18 anos ou mais e aceito os{' '}
-            <Link to="/termos" target="_blank" className="font-semibold text-ouro hover:underline">termos de uso</Link> e a política de{' '}
-            <Link to="/jogo-responsavel" target="_blank" className="font-semibold text-ouro hover:underline">jogo responsável</Link>.
+            <Link to="/termos" target="_blank" className="font-semibold text-marca-forte hover:underline">termos de uso</Link> e a política de{' '}
+            <Link to="/jogo-responsavel" target="_blank" className="font-semibold text-marca-forte hover:underline">jogo responsável</Link>.
           </span>
         </label>
-        <button className="btn btn-ouro btn-grande w-full" disabled={enviando || !aceite}>
+        <button className="btn btn-primario btn-grande w-full" disabled={enviando || !aceite}>
           {enviando ? 'Criando conta...' : 'Criar minha conta'}
         </button>
         <p className="flex items-center justify-center gap-2 text-xs text-apagado">
@@ -164,7 +164,7 @@ export function Cadastro() {
       </form>
       <p className="mt-6 text-center text-sm text-suave">
         Já tem conta?{' '}
-        <Link className="font-semibold text-ouro hover:underline" to="/entrar">
+        <Link className="font-semibold text-marca-forte hover:underline" to="/entrar">
           Entrar
         </Link>
       </p>

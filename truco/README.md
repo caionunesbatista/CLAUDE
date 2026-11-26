@@ -12,8 +12,12 @@ treino contra o computador e um painel para o dono acompanhar as comissões.
 
 | Área | O que faz |
 |---|---|
-| **Jogo** | Truco **Paulista** (vira e manilha que muda) e **Mineiro** (manilhas fixas). Truco/seis/nove(dez)/doze, aceitar, correr, aumentar na hora, mão de onze (dez no Mineiro), mão de ferro, carta coberta, empates. Partida até 12. |
-| **Mesas valendo** | 1x1 e 2x2, valor por jogador escolhido (ou mesa amistosa sem valor). "Jogo rápido" junta os jogadores na mesma mesa. Mesas privadas por link. Escolha de lugar para jogar ao lado do parceiro. |
+| **Jogo** | Truco **Paulista** (vira e manilha que muda) e **Mineiro** (manilhas fixas). Truco/seis/nove(dez)/doze, aceitar, correr, aumentar na hora, mão de onze (dez no Mineiro), empates. Partida até 12. **Um toque na carta joga**; para jogar escondida, toca em "Esconder" e depois na carta. |
+| **11 a 11 (mão de ferro)** | A mesa vota antes de ver as cartas: **normal** ou **nas escuras**. Nas escuras só com **3 dos 4 votos** (no 1x1, os dois); senão, joga normal. |
+| **Mesas valendo** | **1 contra 1**, **duplas com parceiro aleatório** ou **duplas com amigo** (mesa privada por link). Valor por jogador escolhido (ou amistosa sem valor). Escolha de lugar para jogar ao lado do parceiro. |
+| **Torneio relâmpago** | Salas prontas de **4 ou 8** jogadores (1x1 ou duplas) que começam sozinhas quando lotam. Com 4, o campeão leva o pote; com 8, 70% / 30%. |
+| **Revanche** | No fim da mesa, se todos tocarem em "Revanche" em até 60 s, uma nova mesa começa na hora com os mesmos jogadores e valor. |
+| **Mesa viva** | Sons (com botão de mudo), vibração na sua vez no celular, reações que sobem na mesa, frases rápidas, sinais secretos para o parceiro, avatares escolhidos no perfil. |
 | **Salas de duplas** | Quem cria define: nome, Paulista/Mineiro, duplas ou individual, **de 2 a 64 participantes**, inscrição por jogador e **quantas posições ganham prêmio (só a campeã, top 2, top 3 ou top 4) com os percentuais que quiser**. Quando lota, a chave é sorteada e as partidas começam sozinhas (com disputa de 3º lugar se o 3º for premiado). O prêmio cai na hora no saldo. |
 | **Comissão da casa** | Percentual sobre o pote de cada mesa e sala (padrão 10%, muda no painel). Mostrado ao jogador antes de entrar. |
 | **Carteira** | Depósito por PIX (o jogador recebe sua chave e um código; você confirma no painel), saque por PIX (você paga e marca como pago), extrato completo. |
@@ -79,7 +83,9 @@ npm start            # servidor + site em http://localhost:3000
 | Nome do site, slogan, empresa e CNPJ | `src/config/site.js` |
 | Título da aba do navegador e descrição para o Google | `index.html` |
 | Ícone (favicon) | `public/favicon.svg` |
-| Cores | `src/index.css`, bloco `@theme` (ex.: `--color-ouro` é a cor principal) |
+| Cores | `src/index.css`, bloco `@theme`: `--color-marca` (vermelho dos botões), `--color-azul` e `--color-feltro` (azul da mesa) |
+| Desenho das cartas e do verso | `src/components/Carta.jsx` (SVG) |
+| Fontes | Barlow e Barlow Condensed, instaladas pelo npm (`@fontsource`) e servidas pelo próprio site |
 | Textos dos termos de uso e jogo responsável | `src/pages/Legal.jsx` |
 
 ## Ajustar regras do jogo
@@ -121,10 +127,12 @@ Rode **uma única instância** do servidor (o estado das mesas fica na memória 
 npm test
 ```
 
-47 testes, incluindo: 6.000 partidas aleatórias de Paulista e Mineiro sem nenhuma jogada inválida; todas as
-combinações de empate; truco/seis/nove/doze; mão de onze/dez e de ferro; chaves de 2 a 64 participantes;
-milhares de combinações de prêmio sem sumir ou sobrar um centavo; e partidas completas de ponta a ponta com
-jogadores conectados de verdade conferindo o saldo de cada um, a comissão da casa e a devolução quando o servidor cai.
+54 testes, incluindo: 6.000 partidas aleatórias de Paulista e Mineiro sem nenhuma jogada inválida; todas as
+combinações de empate; truco/seis/nove/doze; mão de onze/dez; a votação da mão de ferro (3 de 4 para o escuro);
+chaves de 2 a 64 participantes; milhares de combinações de prêmio sem sumir ou sobrar um centavo; e partidas
+completas de ponta a ponta com jogadores conectados de verdade conferindo o saldo de cada um, a comissão da casa,
+o relâmpago pagando o campeão, a revanche cobrando todos (ou devolvendo se alguém não tiver saldo) e a
+devolução quando o servidor cai.
 
 ---
 

@@ -8,7 +8,7 @@ import { site } from '../config/site.js'
 function Secao({ titulo, children }) {
   return (
     <section className="cartao p-5 sm:p-7">
-      <h2 className="titulo mb-3 text-xl">{titulo}</h2>
+      <h2 className="titulo-secao mb-4 text-3xl">{titulo}</h2>
       <div className="space-y-3 text-[15px] leading-relaxed text-suave [&_strong]:text-texto">{children}</div>
     </section>
   )
@@ -20,7 +20,7 @@ function OrdemCartas() {
       {VALORES.map((r, i) => (
         <div key={r} className="flex flex-col items-center gap-1">
           <Carta carta={{ r, s: i % 2 ? 'c' : 'e' }} tamanho="pequena" />
-          <span className="text-[10px] text-apagado">{i === 0 ? 'mais fraca' : i === VALORES.length - 1 ? 'mais forte' : ''}</span>
+          <span className="h-4 font-display text-[11px] font-bold uppercase tracking-wider text-apagado">{i === 0 ? 'fraca' : i === VALORES.length - 1 ? 'forte' : ''}</span>
         </div>
       ))}
     </div>
@@ -34,7 +34,7 @@ export default function Regras() {
   return (
     <div className="mx-auto max-w-4xl space-y-5 px-4 py-8">
       <div>
-        <h1 className="titulo text-3xl">Regras do truco</h1>
+        <h1 className="titulo text-5xl">Regras do truco</h1>
         <p className="mt-2 text-suave">As regras abaixo são exatamente as que o sistema aplica nas mesas. Em caso de dúvida, vale o que está aqui.</p>
       </div>
 
@@ -82,7 +82,7 @@ export default function Regras() {
               <strong>Mão de onze:</strong> quando uma dupla chega a 11 pontos, ela vê as cartas do parceiro e decide se joga (a mão vale 3) ou corre (os adversários ganham 1). Nessa mão ninguém pode pedir truco.
             </p>
             <p>
-              <strong>Mão de ferro:</strong> se as duas duplas estão com 11, todos jogam às cegas, sem ver as próprias cartas. Quem vencer a mão vence a partida.
+              <strong>Mão de ferro (11 a 11):</strong> as duas duplas com 11. Antes de ver as cartas, a mesa vota: jogar <strong>normal</strong> (cartas à vista) ou <strong>nas escuras</strong> (ninguém vê as próprias cartas). Nas escuras só com <strong>3 dos 4 votos</strong> (no 1x1, os dois precisam querer); senão, é normal. Vale 1 ponto, sem truco, e quem vencer a mão vence a partida.
             </p>
             <p>Depois de uma vaza empatada, quem abriu essa vaza abre a seguinte.</p>
           </Secao>
@@ -113,7 +113,7 @@ export default function Regras() {
               <strong>Mão de dez:</strong> quando uma dupla chega a 10 pontos, ela vê as cartas do parceiro e decide se joga (a mão vale 4) ou corre (os adversários ganham 2). Sem truco nessa mão.
             </p>
             <p>
-              <strong>Mão de ferro:</strong> com as duas duplas em 10, todos jogam às cegas e quem vencer a mão vence a partida.
+              <strong>Mão de ferro (10 a 10):</strong> a mesa vota antes de ver as cartas: normal ou nas escuras. Nas escuras só com <strong>3 dos 4 votos</strong> (no 1x1, os dois); senão, normal. Vale 2, sem truco, e quem vencer a mão vence a partida.
             </p>
             <p>Depois de uma vaza empatada, quem jogou primeiro a carta do empate abre a vaza seguinte.</p>
           </Secao>
@@ -138,14 +138,14 @@ export default function Regras() {
           <li>Empate só acontece entre adversários: se os dois parceiros jogarem a maior carta, a dupla vence a vaza.</li>
         </ul>
         <p>
-          <strong>Carta coberta:</strong> a partir da 2ª vaza você pode jogar uma carta virada para baixo. Ela não vale nada na vaza e os outros não veem qual era.
+          <strong>Carta escondida:</strong> a partir da 2ª vaza, toque em <strong>Esconder</strong> e depois na carta: ela cai virada para baixo, não vale nada na vaza e ninguém vê qual era.
         </p>
       </Secao>
 
       <Secao titulo="Regras da casa">
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            Cada jogada tem <strong>{config?.tempoJogada ?? 30} segundos</strong>. Se o tempo acabar, o sistema joga a sua carta mais fraca, ou corre do pedido, ou corre da mão de onze/dez.
+            Cada jogada tem <strong>{config?.tempoJogada ?? 30} segundos</strong>. Se o tempo acabar, o sistema joga a sua carta mais fraca, ou corre do pedido, corre da mão de onze/dez ou vota "normal" na mão de ferro.
           </li>
           <li>Se você estiver desconectado, o tempo da sua jogada cai para 10 segundos para não travar a mesa.</li>
           <li>Ao sair de uma mesa antes de ela começar, o valor volta na hora para o seu saldo. Depois que começa, a partida vai até o fim.</li>

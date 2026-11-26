@@ -50,6 +50,8 @@ export class Mesa {
     this.resultado = null
     this.criadaEm = Date.now()
     this.encerradaEm = null
+    this.revanche = null // { votos: Set<usuarioId>, ate, novaMesa, recusada }
+    this.ultimaReacao = new Map()
   }
 
   get ocupados() {
@@ -135,8 +137,7 @@ export class Mesa {
       return
     }
 
-    const quem = p.aguardando()
-    const assentos = quem.assento !== undefined ? [quem.assento] : p.assentosDoTime(quem.time)
+    const { assentos } = p.aguardando()
     const humanos = assentos.filter((s) => !this.assentos[s].bot)
     const tempo = ajustes().tempoJogada
     let total = tempo
@@ -175,10 +176,14 @@ export class Mesa {
   tempoEsgotado() {
     if (this.status !== 'jogando') return
     const p = this.partida
-    const auto = p.acaoAutomatica()
-    if (!auto) return
-    p.evento('tempoEsgotado', { assento: auto.assento })
-    p.agir(auto.assento, auto.acao)
+    const fase = p.fase
+    // Na votação do 11 a 11, todos que não votaram votam "normal" de uma vez.
+    do {
+      const auto = p.acaoAutomatica()
+      if (!auto) break
+      if (fase !== 'votoFerro') p.evento('tempoEsgotado', { assento: auto.assento })
+      p.agir(auto.assento, auto.acao)
+    } while (fase === 'votoFerro' && p.fase === 'votoFerro')
     this.passo()
   }
 
@@ -250,6 +255,7 @@ export class Mesa {
           ? {
               assento: i,
               apelido: a.apelido,
+              avatar: a.avatar || null,
               bot: Boolean(a.bot),
               conectado: a.bot ? true : avisos.conectado(a.usuarioId),
               time: i % 2,
@@ -263,6 +269,16 @@ export class Mesa {
       agora: Date.now(),
       frases: this.frases,
       resultado: this.resultado,
+      // Prazo para pedir revanche (mesas valendo/amistosas), contado do fim da partida.
+      revancheAte: this.tipo === 'dinheiro' && this.status === 'encerrada' && this.encerradaEm ? this.encerradaEm + 60_000 : null,
+      revanche: this.revanche
+        ? {
+            votos: this.assentos.map((a, i) => (a && this.revanche.votos.has(a.usuarioId) ? i : -1)).filter((i) => i >= 0),
+            novaMesa: this.revanche.novaMesa,
+            recusada: this.revanche.recusada,
+            ate: this.revanche.ate,
+          }
+        : null,
     }
   }
 
@@ -277,6 +293,7 @@ export class Mesa {
       ocupados: this.ocupados,
       status: this.status,
       nomes: this.assentos.map((a) => (a ? a.apelido : null)),
+      avatares: this.assentos.map((a) => (a ? a.avatar || null : null)),
       placar: this.partida ? [...this.partida.placar] : null,
       criadaEm: this.criadaEm,
     }

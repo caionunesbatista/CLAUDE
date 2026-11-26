@@ -46,7 +46,72 @@ function sentarPagando(mesa, usuario, assento) {
   if (mesa.aposta > 0) {
     reservaId = reservar(usuario.id, mesa.aposta, 'mesa', mesa.id, `Entrada — mesa ${VARIANTES[mesa.variante].curto} ${mesa.jogadores === 4 ? '2x2' : '1x1'}`)
   }
-  mesa.assentos[assento] = { usuarioId: usuario.id, apelido: usuario.apelido, bot: false, reservaId }
+  mesa.assentos[assento] = { usuarioId: usuario.id, apelido: usuario.apelido, avatar: usuario.avatar || null, bot: false, reservaId }
+}
+
+// ---------- revanche ----------
+
+const JANELA_REVANCHE_MS = 60_000
+
+/**
+ * Pede revanche numa mesa que acabou de terminar. Quando todos pedem, uma nova mesa
+ * com os mesmos jogadores, lugares e valor começa na hora (cada um paga a entrada de novo).
+ * Retorna o id da nova mesa quando ela é criada.
+ */
+export function votarRevanche(usuario, mesaId) {
+  const mesa = mesas.get(mesaId)
+  if (!mesa) throw new ErroUsuario('Mesa não encontrada.', 404)
+  if (mesa.tipo !== 'dinheiro') throw new ErroUsuario('Revanche só existe nas mesas.')
+  if (mesa.status !== 'encerrada') throw new ErroUsuario('A partida ainda não terminou.')
+  if (mesa.assentoDe(usuario.id) < 0) throw new ErroUsuario('Só quem jogou pode pedir revanche.')
+  if (mesa.revanche?.novaMesa) return mesa.revanche.novaMesa
+  const ate = (mesa.encerradaEm || Date.now()) + JANELA_REVANCHE_MS
+  if (Date.now() > ate) throw new ErroUsuario('O tempo para pedir revanche acabou.')
+  if (!mesa.revanche) mesa.revanche = { votos: new Set(), ate, novaMesa: null, recusada: null }
+  mesa.revanche.recusada = null
+  mesa.revanche.votos.add(usuario.id)
+  if (mesa.assentos.every((a) => mesa.revanche.votos.has(a.usuarioId))) iniciarRevanche(mesa)
+  avisos.mesa(mesa)
+  return mesa.revanche.novaMesa
+}
+
+function iniciarRevanche(mesa) {
+  const r = mesa.revanche
+  const falhar = (motivo) => {
+    r.recusada = motivo
+    r.votos.clear()
+  }
+  for (const a of mesa.assentos) {
+    if (mesaAtivaDo(a.usuarioId)) return falhar(`${a.apelido} já entrou em outra mesa.`)
+  }
+  if (mesa.aposta > 0 && !ajustes().mesasValendoAbertas) return falhar('As mesas valendo estão pausadas no momento.')
+  const nova = new Mesa({
+    id: gerarId(),
+    tipo: 'dinheiro',
+    variante: mesa.variante,
+    jogadores: mesa.jogadores,
+    aposta: mesa.aposta,
+    taxa: mesa.aposta > 0 ? ajustes().taxaCasa : 0,
+    privada: true,
+    criadorId: mesa.criadorId,
+    aoTerminar: liquidarMesa,
+    aoFalhar: falhaNaMesa,
+  })
+  for (let i = 0; i < mesa.assentos.length; i++) {
+    const antigo = mesa.assentos[i]
+    const u = db().prepare('SELECT id, apelido, avatar, bloqueado FROM usuarios WHERE id = ?').get(antigo.usuarioId)
+    try {
+      if (!u || u.bloqueado) throw new ErroUsuario('indisponível')
+      sentarPagando(nova, u, i)
+    } catch {
+      // Desfaz quem já pagou. A mensagem não revela o saldo de ninguém.
+      for (const a of nova.assentos) if (a?.reservaId) devolverReserva(a.reservaId, 'Revanche não aconteceu — valor devolvido')
+      return falhar(`${antigo.apelido} não tem saldo para a revanche.`)
+    }
+  }
+  mesas.set(nova.id, nova)
+  r.novaMesa = nova.id
+  nova.iniciar()
 }
 
 function garantirLivre(usuario) {
@@ -162,7 +227,7 @@ export function criarTreino(usuario, op = {}) {
   }
   const mesa = new Mesa({ id: gerarId(), tipo: 'treino', variante, jogadores, privada: true, criadorId: usuario.id, aoFalhar: falhaNaMesa })
   const nomes = [...NOMES_BOTS].sort(() => Math.random() - 0.5)
-  mesa.assentos[0] = { usuarioId: usuario.id, apelido: usuario.apelido, bot: false, reservaId: null }
+  mesa.assentos[0] = { usuarioId: usuario.id, apelido: usuario.apelido, avatar: usuario.avatar || null, bot: false, reservaId: null }
   for (let i = 1; i < jogadores; i++) mesa.assentos[i] = { usuarioId: null, apelido: nomes[i], bot: true, reservaId: null }
   mesas.set(mesa.id, mesa)
   mesa.iniciar()

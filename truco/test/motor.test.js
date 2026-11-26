@@ -256,10 +256,19 @@ test('mão de onze: vencer fecha a partida, perder dá 3 aos adversários', () =
   assert.deepEqual(q.placar, [11, 3])
 })
 
-test('mão de ferro: cartas ocultas para todos, vale 1 e decide a partida', () => {
+test('mão de ferro nas escuras (1x1, os dois votam escuro): cartas ocultas, vale 1 e decide a partida', () => {
   const p = partidaCom({ jogadores: 2, carteador: 1, placar: [11, 11], cartas: [['3o', '2o', 'Ao'], ['4c', '5c', '6c']], vira: '7o' })
   assert.equal(p.mao.especial, 'ferro')
+  assert.equal(p.fase, 'votoFerro')
+  // Durante a votação ninguém vê as próprias cartas.
+  assert.ok(!JSON.stringify(p.visao(0)).includes('"3o"'))
+  assert.throws(() => p.agir(0, { tipo: 'jogar', indice: 0 }), ErroJogo)
+  p.agir(0, { tipo: 'votoFerro', escuro: true })
+  assert.throws(() => p.agir(0, { tipo: 'votoFerro', escuro: false }), ErroJogo, 'não vota duas vezes')
+  assert.equal(p.fase, 'votoFerro')
+  p.agir(1, { tipo: 'votoFerro', escuro: true })
   assert.equal(p.fase, 'jogando')
+  assert.equal(p.mao.escuro, true)
   const v = p.visao(0)
   assert.ok(v.mao.minhasCartas.every((x) => x.oculta))
   assert.ok(!JSON.stringify(v).includes('"3o"'))
@@ -270,6 +279,57 @@ test('mão de ferro: cartas ocultas para todos, vale 1 e decide a partida', () =
   p.agir(1, { tipo: 'jogar', indice: 0 })
   assert.equal(p.fase, 'fim')
   assert.deepEqual(p.placar, [12, 11])
+})
+
+test('mão de ferro 1x1: basta um voto "normal" para jogar com as cartas à vista', () => {
+  const p = partidaCom({ jogadores: 2, carteador: 1, placar: [11, 11], cartas: [['3o', '2o', 'Ao'], ['4c', '5c', '6c']], vira: '7o' })
+  p.agir(1, { tipo: 'votoFerro', escuro: false })
+  assert.equal(p.fase, 'jogando')
+  assert.equal(p.mao.escuro, false)
+  const v = p.visao(0)
+  assert.deepEqual(v.mao.minhasCartas.map((c) => c.id), ['3o', '2o', 'Ao'])
+  assert.throws(() => p.agir(0, { tipo: 'aumentar' }), ErroJogo, 'sem truco no 11 a 11')
+  p.agir(0, { tipo: 'jogar', carta: '3o' })
+  p.agir(1, { tipo: 'jogar', carta: '4c' })
+  p.agir(0, { tipo: 'jogar', carta: '2o' })
+  p.agir(1, { tipo: 'jogar', carta: '5c' })
+  assert.deepEqual(p.placar, [12, 11])
+})
+
+test('mão de ferro em duplas: escuro só com 3 de 4 votos', () => {
+  const cartas = [['3o', '4o', '5o'], ['2o', '4c', '5c'], ['3c', '4e', '5e'], ['Ko', '4p', '5p']]
+  // 3 votos escuro → nas escuras (decide no 3º voto, sem esperar o 4º).
+  const a = partidaCom({ placar: [11, 11], cartas, vira: '7o' })
+  a.agir(0, { tipo: 'votoFerro', escuro: true })
+  a.agir(1, { tipo: 'votoFerro', escuro: true })
+  assert.equal(a.fase, 'votoFerro')
+  a.agir(2, { tipo: 'votoFerro', escuro: true })
+  assert.equal(a.fase, 'jogando')
+  assert.equal(a.mao.escuro, true)
+
+  // 2 a 2 → normal (decide no 2º voto "normal", pois o escuro não alcança mais 3).
+  const b = partidaCom({ placar: [11, 11], cartas, vira: '7o' })
+  b.agir(0, { tipo: 'votoFerro', escuro: true })
+  b.agir(1, { tipo: 'votoFerro', escuro: false })
+  b.agir(2, { tipo: 'votoFerro', escuro: true })
+  assert.equal(b.fase, 'votoFerro')
+  b.agir(3, { tipo: 'votoFerro', escuro: false })
+  assert.equal(b.fase, 'jogando')
+  assert.equal(b.mao.escuro, false)
+
+  const c = partidaCom({ placar: [11, 11], cartas, vira: '7o' })
+  c.agir(3, { tipo: 'votoFerro', escuro: false })
+  assert.equal(c.fase, 'votoFerro')
+  c.agir(1, { tipo: 'votoFerro', escuro: false })
+  assert.equal(c.fase, 'jogando')
+  assert.equal(c.mao.escuro, false)
+  assert.deepEqual(c.visao(0).mao.votos, [null, 'normal', null, 'normal'])
+
+  // Tempo esgotado na votação: vota "normal".
+  const d = partidaCom({ placar: [11, 11], cartas, vira: '7o' })
+  const auto = d.acaoAutomatica()
+  assert.deepEqual(auto.acao, { tipo: 'votoFerro', escuro: false })
+  assert.deepEqual(d.aguardando().assentos, [0, 1, 2, 3])
 })
 
 test('Mineiro: mão vale 2, truco 4 e mão de dez vale 4 (correr dá 2)', () => {
@@ -330,17 +390,17 @@ test('a visão de um jogador nunca mostra as cartas na mão dos outros', () => {
 
 /** Escolhe uma ação aleatória válida para alguém que precisa agir. */
 function acaoAleatoria(p, rnd) {
-  const quem = p.aguardando()
-  const candidatos = quem.assento !== undefined ? [quem.assento] : p.assentosDoTime(quem.time)
+  const candidatos = p.aguardando().assentos
   const assento = candidatos[rnd(candidatos.length)]
   const a = p.acoesDisponiveis(assento)
   const opcoes = []
   if (a.decidirOnze) opcoes.push({ tipo: 'onze', jogar: true }, { tipo: 'onze', jogar: false })
+  if (a.votarFerro) opcoes.push({ tipo: 'votoFerro', escuro: true }, { tipo: 'votoFerro', escuro: false })
   if (a.responder) opcoes.push({ tipo: 'aceitar' }, { tipo: 'correr' })
   if (a.aumentar && rnd(4) === 0) opcoes.push({ tipo: 'aumentar' })
   if (a.jogar) {
     const mao = p.mao.cartas[assento]
-    if (p.mao.especial === 'ferro') opcoes.push({ tipo: 'jogar', indice: rnd(mao.length) })
+    if (p.maoAsCegas) opcoes.push({ tipo: 'jogar', indice: rnd(mao.length) })
     else {
       const carta = mao[rnd(mao.length)]
       opcoes.push({ tipo: 'jogar', carta: carta.id, coberta: a.cobrir && rnd(5) === 0 })
@@ -389,8 +449,7 @@ test('bots jogam partidas completas sem ações inválidas', () => {
             p.iniciarMao()
             continue
           }
-          const quem = p.aguardando()
-          const assentos = quem.assento !== undefined ? [quem.assento] : p.assentosDoTime(quem.time)
+          const { assentos } = p.aguardando()
           let agiu = false
           for (const s of assentos) {
             const acao = decidirBot(p, s, { aleatorio: rnd })

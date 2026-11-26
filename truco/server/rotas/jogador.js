@@ -2,11 +2,19 @@
 import { Router } from 'express'
 import { rota, ErroUsuario } from '../erros.js'
 import { exigirLogin, trocarSenha, usuarioPublico, buscarUsuario, criarSessao, gravarCookieSessao } from '../contas.js'
-import { criarMesa, entrarMesa, sairMesa, mesaRapida, criarTreino, trocarLugar } from '../salas/mesas.js'
-import { criarTorneio, entrarTorneio, sairTorneio, cancelarTorneio, trocarVagaTorneio } from '../salas/torneios.js'
+import { criarMesa, entrarMesa, sairMesa, mesaRapida, criarTreino, trocarLugar, votarRevanche } from '../salas/mesas.js'
+import {
+  criarTorneio,
+  entrarTorneio,
+  sairTorneio,
+  cancelarTorneio,
+  trocarVagaTorneio,
+  torneioRelampago,
+} from '../salas/torneios.js'
 import { extrato, criarDeposito, cancelarDeposito, solicitarSaque } from '../carteira.js'
 import { ajustes } from '../ajustes.js'
 import { db } from '../db.js'
+import { avatarValido } from '../../shared/regras.js'
 
 export const rotasJogador = Router()
 rotasJogador.use(exigirLogin)
@@ -51,6 +59,28 @@ rotasJogador.post(
   rota((req, res) => {
     trocarLugar(req.usuario, req.params.id, Number(req.body?.assento))
     res.json({ ok: true })
+  }),
+)
+
+rotasJogador.post(
+  '/mesas/:id/revanche',
+  rota((req, res) => {
+    const novaMesa = votarRevanche(req.usuario, req.params.id)
+    res.json({ novaMesa })
+  }),
+)
+
+rotasJogador.post(
+  '/torneios/relampago',
+  rota((req, res) => {
+    const b = req.body || {}
+    const t = torneioRelampago(req.usuario, {
+      variante: b.variante,
+      formato: b.formato,
+      times: Number(b.times),
+      entrada: Number(b.entrada),
+    })
+    res.json({ id: t.id })
   }),
 )
 
@@ -200,9 +230,16 @@ rotasJogador.get(
 rotasJogador.put(
   '/perfil',
   rota((req, res) => {
-    const chave = String(req.body?.chavePix ?? '').trim()
-    if (chave && (chave.length < 5 || chave.length > 140)) throw new ErroUsuario('Chave PIX inválida.')
-    db().prepare('UPDATE usuarios SET chave_pix = ? WHERE id = ?').run(chave || null, req.usuario.id)
+    const b = req.body || {}
+    if (b.chavePix !== undefined) {
+      const chave = String(b.chavePix ?? '').trim()
+      if (chave && (chave.length < 5 || chave.length > 140)) throw new ErroUsuario('Chave PIX inválida.')
+      db().prepare('UPDATE usuarios SET chave_pix = ? WHERE id = ?').run(chave || null, req.usuario.id)
+    }
+    if (b.avatar !== undefined) {
+      if (!avatarValido(b.avatar)) throw new ErroUsuario('Avatar inválido.')
+      db().prepare('UPDATE usuarios SET avatar = ? WHERE id = ?').run(b.avatar, req.usuario.id)
+    }
     res.json({ usuario: usuarioPublico(buscarUsuario(req.usuario.id)) })
   }),
 )

@@ -144,7 +144,14 @@ export function abrirBanco() {
     banco.exec('PRAGMA synchronous = FULL;')
   }
   banco.exec(ESQUEMA)
+  migrar(banco)
   return banco
+}
+
+/** Ajustes de estrutura para bancos criados por versões anteriores (nada é apagado). */
+function migrar(d) {
+  const colunas = d.prepare('PRAGMA table_info(usuarios)').all().map((c) => c.name)
+  if (!colunas.includes('avatar')) d.exec('ALTER TABLE usuarios ADD COLUMN avatar TEXT')
 }
 
 export function db() {

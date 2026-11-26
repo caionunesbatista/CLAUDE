@@ -3,6 +3,7 @@
 import { Server } from 'socket.io'
 import { mesas, torneios, avisos } from './salas/central.js'
 import { SINAIS } from './salas/mesa.js'
+import { REACOES } from '../shared/regras.js'
 import { listaMesasPublicas, mesaAtivaDo } from './salas/mesas.js'
 import { listaTorneiosPublicos, torneioAtivoDo } from './salas/torneios.js'
 import { lerCookies, usuarioDoToken } from './contas.js'
@@ -150,6 +151,21 @@ export function iniciarTempoReal(servidorHttp) {
       } catch (erro) {
         responder(ack, { erro: erro.message })
       }
+    })
+
+    // Reações (emoji) sobem na mesa para todos; não ficam gravadas no estado.
+    socket.on('mesa:reacao', (dados, ack) => {
+      if (!permitir() || !exigirUsuario(ack)) return
+      const mesa = mesas.get(dados?.id)
+      if (!mesa) return
+      const assento = mesa.assentoDe(socket.data.usuario.id)
+      const indice = dados.indice
+      if (assento < 0 || !Number.isInteger(indice) || indice < 0 || indice >= REACOES.length) return
+      const agora = Date.now()
+      if (agora - (mesa.ultimaReacao.get(socket.data.usuario.id) || 0) < 1200) return responder(ack, { ok: true })
+      mesa.ultimaReacao.set(socket.data.usuario.id, agora)
+      io.to(`m:${mesa.id}`).emit('mesa:reacao', { mesaId: mesa.id, assento, emoji: REACOES[indice], id: `${agora}-${assento}` })
+      responder(ack, { ok: true })
     })
 
     socket.on('mesa:sinal', (dados, ack) => {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { Share2, Users, User, LogOut, XCircle, Swords, Crown, Trophy, Clock, Eye, CircleDot, Lock, Medal, ArrowRight } from 'lucide-react'
+import { Share2, Users, User, LogOut, XCircle, Swords, Crown, Trophy, Clock, Eye, CircleDot, Lock, Medal, ArrowRight, Zap } from 'lucide-react'
 import { useSessao, avisar } from '../store/sessao.js'
 import { obterSocket } from '../lib/socket.js'
 import { api } from '../lib/api.js'
@@ -8,6 +8,7 @@ import { formatarReais, copiar } from '../lib/formato.js'
 import { VARIANTES } from '../../shared/regras.js'
 import { Carregando, Vazio, Modal, useTitulo } from '../components/ui.jsx'
 import { TabelaPremios } from '../components/Premiacao.jsx'
+import { Avatar } from '../components/Avatar.jsx'
 import { site } from '../config/site.js'
 
 function useTorneio(id) {
@@ -47,7 +48,7 @@ function Vagas({ t, aoAcao, ocupado }) {
       {t.vagas.map((time) => {
         const minha = t.meuLugar?.time === time.indice
         return (
-          <div key={time.indice} className={`rounded-2xl border p-3 ${minha ? 'border-ouro/60 bg-ouro/5' : 'border-linha bg-fundo/50'}`}>
+          <div key={time.indice} className={`rounded-2xl border p-3 ${minha ? 'border-marca/60 bg-marca/5' : 'border-linha bg-fundo/50'}`}>
             <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wider text-apagado">
               {palavra} {time.indice + 1}
             </p>
@@ -55,16 +56,19 @@ function Vagas({ t, aoAcao, ocupado }) {
               {time.membros.map((m, vaga) =>
                 m ? (
                   <div key={vaga} className="flex items-center gap-2.5 rounded-xl bg-painel-2 px-3 py-2">
-                    <span className={`h-2 w-2 rounded-full ${m.conectado ? 'bg-dinheiro' : 'bg-apagado'}`} title={m.conectado ? 'Online' : 'Offline'} />
-                    <span className="flex-1 truncate text-sm font-semibold">{m.apelido}</span>
-                    {m.eu && <span className="selo bg-ouro/20 text-ouro">você</span>}
+                    <span className="relative">
+                      <Avatar avatar={m.avatar} apelido={m.apelido} tamanho={26} />
+                      <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-painel-2 ${m.conectado ? 'bg-dinheiro' : 'bg-apagado'}`} title={m.conectado ? 'Online' : 'Offline'} />
+                    </span>
+                    <span className="flex-1 truncate font-semibold">{m.apelido}</span>
+                    {m.eu && <span className="selo bg-marca/20 text-marca-forte">você</span>}
                   </div>
                 ) : t.status === 'inscricoes' ? (
                   <button
                     key={vaga}
                     disabled={ocupado}
                     onClick={() => (usuario ? aoAcao(t.meuLugar ? 'trocar' : 'entrar', { time: time.indice, vaga }) : aoAcao('login'))}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-linha-forte px-3 py-2 text-sm font-semibold text-suave transition-colors hover:border-ouro hover:text-ouro"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-linha-forte px-3 py-2 text-sm font-semibold text-suave transition-colors hover:border-marca hover:text-marca-forte"
                   >
                     {t.meuLugar ? 'Mudar para cá' : 'Entrar aqui'}
                   </button>
@@ -85,8 +89,8 @@ function Vagas({ t, aoAcao, ocupado }) {
 function Lado({ lado, vencedor, eu }) {
   if (lado.pendente) return <p className="truncate text-sm italic text-apagado">{lado.pendente}</p>
   return (
-    <p className={`flex items-center gap-1.5 truncate text-sm ${vencedor ? 'font-bold text-texto' : 'text-suave'} ${eu ? 'text-ouro' : ''}`}>
-      {vencedor && <Crown size={13} className="shrink-0 text-ouro" />}
+    <p className={`flex items-center gap-1.5 truncate text-sm ${vencedor ? 'font-bold text-texto' : 'text-suave'} ${eu ? 'text-marca-forte' : ''}`}>
+      {vencedor && <Crown size={13} className="shrink-0 text-marca-forte" />}
       <span className="truncate">{lado.nomes}</span>
     </p>
   )
@@ -113,7 +117,7 @@ function Chave({ t }) {
               {jogos.map((j) => {
                 const ehMeu = meuTime !== undefined && (j.a.time === meuTime || j.b.time === meuTime)
                 return (
-                  <div key={j.id} className={`rounded-2xl border p-3 ${ehMeu ? 'border-ouro/60' : 'border-linha'} bg-painel-2`}>
+                  <div key={j.id} className={`rounded-2xl border p-3 ${ehMeu ? 'border-marca/60' : 'border-linha'} bg-painel-2`}>
                     <div className="mb-2 flex items-center justify-between">
                       <span className="text-[11px] font-semibold text-apagado">{j.rotulo}</span>
                       {j.status === 'jogando' && (
@@ -154,7 +158,7 @@ function Chave({ t }) {
 }
 
 function Podio({ t }) {
-  const cores = ['from-ouro/30 border-ouro/60', 'from-[#cfd6e3]/20 border-[#cfd6e3]/40', 'from-[#d49a6a]/20 border-[#d49a6a]/40', 'from-painel-3 border-linha']
+  const cores = ['from-ouro/25 border-ouro/60', 'from-[#cfd6e3]/20 border-[#cfd6e3]/40', 'from-[#d49a6a]/20 border-[#d49a6a]/40', 'from-painel-3 border-linha']
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {t.colocacao.map((c, i) => (
@@ -170,7 +174,7 @@ function Podio({ t }) {
               <p className="text-sm text-apagado">sem prêmio</p>
             )}
           </div>
-          {i === 0 && <Trophy className="text-ouro" size={28} />}
+          {i === 0 && <Trophy className="text-marca-forte" size={28} />}
         </div>
       ))}
     </div>
@@ -202,7 +206,7 @@ export default function Sala() {
       <section className="mx-auto max-w-xl px-4 py-16">
         <div className="cartao">
           <Vazio icone={Trophy} titulo="Sala não encontrada" texto="Ela pode ter sido encerrada há algum tempo ou o link está incompleto.">
-            <Link to="/salas" className="btn btn-ouro">
+            <Link to="/salas" className="btn btn-primario">
               Ver salas abertas
             </Link>
           </Vazio>
@@ -269,10 +273,16 @@ export default function Sala() {
                 <Lock size={11} /> Privada
               </span>
             )}
+            {t.relampago && (
+              <span className="selo bg-ouro/15 text-ouro">
+                <Zap size={12} /> Relâmpago
+              </span>
+            )}
           </div>
-          <h1 className="titulo mt-3 break-words text-3xl sm:text-4xl">{t.nome}</h1>
-          <p className="mt-1 text-sm text-suave">
-            Criada por <strong className="text-texto">{t.criador.apelido}</strong> · inscrição {t.entrada ? <strong className="numero text-texto">{formatarReais(t.entrada)} por jogador</strong> : 'grátis'}
+          <h1 className="titulo mt-3 break-words text-4xl sm:text-6xl">{t.nome}</h1>
+          <p className="mt-2 text-suave">
+            {t.relampago ? 'Torneio rápido · começa sozinho quando lotar' : <>Criada por <strong className="text-texto">{t.criador.apelido}</strong></>} · inscrição{' '}
+            {t.entrada ? <strong className="numero text-texto">{formatarReais(t.entrada)} por jogador</strong> : 'grátis'}
           </p>
         </div>
         <button className="btn btn-sec" onClick={compartilhar}>
@@ -290,10 +300,10 @@ export default function Sala() {
       )}
 
       {t.minhaPartida && (
-        <Link to={`/mesa/${t.minhaPartida}`} className="cartao animar-surgir mt-6 flex items-center gap-3 border-ouro/60 p-4">
-          <Swords className="text-ouro" />
+        <Link to={`/mesa/${t.minhaPartida}`} className="cartao animar-surgir mt-6 flex items-center gap-3 border-marca/60 p-4">
+          <Swords className="text-marca-forte" />
           <span className="flex-1 font-bold">Sua partida está rolando agora!</span>
-          <span className="btn btn-ouro btn-pequeno">
+          <span className="btn btn-primario btn-pequeno">
             Ir para a mesa <ArrowRight size={16} />
           </span>
         </Link>
@@ -304,7 +314,7 @@ export default function Sala() {
           {t.status === 'encerrado' && t.colocacao && (
             <div className="cartao p-5 sm:p-6">
               <h2 className="titulo mb-4 flex items-center gap-2 text-xl">
-                <Trophy className="text-ouro" size={22} /> Resultado final
+                <Trophy className="text-marca-forte" size={22} /> Resultado final
               </h2>
               <Podio t={t} />
             </div>
@@ -332,12 +342,12 @@ export default function Sala() {
                 </span>
               </div>
               <div className="mb-5 h-2 overflow-hidden rounded-full bg-painel-3">
-                <div className="h-full rounded-full bg-gradient-to-r from-ouro-escuro to-ouro transition-all" style={{ width: `${(t.inscritos / t.total) * 100}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-marca-escura to-marca transition-all" style={{ width: `${(t.inscritos / t.total) * 100}%` }} />
               </div>
               <Vagas t={t} aoAcao={acao} ocupado={ocupado} />
               <div className="mt-5 flex flex-wrap gap-3">
                 {!t.meuLugar && (
-                  <button className="btn btn-ouro" disabled={ocupado} onClick={() => (usuario ? acao('entrar') : acao('login'))}>
+                  <button className="btn btn-primario" disabled={ocupado} onClick={() => (usuario ? acao('entrar') : acao('login'))}>
                     Entrar em qualquer vaga {t.entrada ? `· ${formatarReais(t.entrada)}` : ''}
                   </button>
                 )}
@@ -367,7 +377,7 @@ export default function Sala() {
         <aside className="order-first space-y-5 lg:order-none">
           <div className="cartao p-5">
             <h2 className="titulo mb-1 flex items-center gap-2 text-lg">
-              <Medal className="text-ouro" size={20} /> Premiação
+              <Medal className="text-marca-forte" size={20} /> Premiação
             </h2>
             {t.entrada > 0 ? (
               <>

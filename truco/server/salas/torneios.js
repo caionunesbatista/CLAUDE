@@ -13,9 +13,11 @@ import { calcularPremios } from '../../shared/premios.js'
 import { VARIANTES, validarPercentuais } from '../../shared/regras.js'
 
 export class Torneio {
-  constructor({ id, nome, criador, variante, formato, times, entrada, taxa, percentuais, privada }) {
+  constructor({ id, nome, criador, variante, formato, times, entrada, taxa, percentuais, privada, relampago = false }) {
     this.id = id
     this.nome = nome
+    // Relâmpago: sala pronta do sistema (4 ou 8 participantes) que começa sozinha quando lota.
+    this.relampago = relampago
     this.criadorId = criador.id
     this.criadorApelido = criador.apelido
     this.variante = variante
@@ -134,19 +136,23 @@ export class Torneio {
       taxa: this.taxa,
       percentuais: this.percentuais,
       privada: this.privada,
+      relampago: this.relampago,
       status: this.status,
       motivoCancelamento: this.motivoCancelamento,
       calculo: calc,
       inscritos: this.inscritos,
       total: this.total,
-      souCriador: usuarioId === this.criadorId,
+      // No relâmpago ninguém é "dono" da sala: só a administração cancela.
+      souCriador: !this.relampago && usuarioId === this.criadorId,
       meuLugar: lugar,
       souVivo: lugar ? this.timeVivo(lugar.time) : false,
       minhaPartida,
       vagas: this.vagas.map((time, i) => ({
         indice: i,
         membros: time.map((v) =>
-          v ? { apelido: v.apelido, eu: v.usuarioId === usuarioId, conectado: avisos.conectado(v.usuarioId) } : null,
+          v
+            ? { apelido: v.apelido, avatar: v.avatar || null, eu: v.usuarioId === usuarioId, conectado: avisos.conectado(v.usuarioId) }
+            : null,
         ),
       })),
       chave: this.chave
@@ -187,7 +193,8 @@ export class Torneio {
       premiados: this.percentuais.length,
       percentuais: this.percentuais,
       status: this.status,
-      criador: this.criadorApelido,
+      relampago: this.relampago,
+      criador: this.relampago ? null : this.criadorApelido,
       criadoEm: this.criadoEm,
     }
   }
@@ -247,6 +254,7 @@ export function criarTorneio(usuario, op = {}) {
     taxa: entrada > 0 ? ajustes().taxaCasa : 0,
     percentuais: [...op.percentuais],
     privada: op.privada === true,
+    relampago: op.relampago === true,
   })
   db()
     .prepare('INSERT INTO torneios (id, nome, criador_id, config, status) VALUES (?, ?, ?, ?, ?)')
@@ -254,7 +262,16 @@ export function criarTorneio(usuario, op = {}) {
       t.id,
       t.nome,
       usuario.id,
-      JSON.stringify({ variante: t.variante, formato, times, entrada, taxa: t.taxa, percentuais: t.percentuais, privada: t.privada }),
+      JSON.stringify({
+        variante: t.variante,
+        formato,
+        times,
+        entrada,
+        taxa: t.taxa,
+        percentuais: t.percentuais,
+        privada: t.privada,
+        relampago: t.relampago,
+      }),
       t.status,
     )
   torneios.set(t.id, t)
@@ -277,7 +294,44 @@ function inscrever(t, usuario, time, vaga) {
   if (t.vagas[time][vaga]) throw new ErroUsuario('Essa vaga já está ocupada.')
   let reservaId = null
   if (t.entrada > 0) reservaId = reservar(usuario.id, t.entrada, 'torneio', t.id, `Inscrição — sala "${t.nome}"`)
-  t.vagas[time][vaga] = { usuarioId: usuario.id, apelido: usuario.apelido, reservaId }
+  t.vagas[time][vaga] = { usuarioId: usuario.id, apelido: usuario.apelido, avatar: usuario.avatar || null, reservaId }
+}
+
+// ---------- torneio relâmpago ----------
+
+export const TAMANHOS_RELAMPAGO = [4, 8]
+
+/** Divisão do prêmio do relâmpago: com 4, o campeão leva tudo; com 8, 70% / 30%. */
+export function premiosRelampago(times) {
+  return times >= 8 ? [70, 30] : [100]
+}
+
+/** Entra no relâmpago aberto mais cheio com a mesma configuração ou abre um novo. */
+export function torneioRelampago(usuario, op = {}) {
+  if (!VARIANTES[op.variante]) throw new ErroUsuario('Escolha Truco Paulista ou Truco Mineiro.')
+  const formato = op.formato === 'duplas' ? 'duplas' : 'individual'
+  const times = op.times
+  if (!TAMANHOS_RELAMPAGO.includes(times)) throw new ErroUsuario('O torneio relâmpago é de 4 ou 8 participantes.')
+  const entrada = validarAposta(op.entrada)
+  garantirLivre(usuario)
+  let melhor = null
+  for (const t of torneios.values()) {
+    if (!t.relampago || t.status !== 'inscricoes' || t.cheio) continue
+    if (t.variante !== op.variante || t.formato !== formato || t.times !== times || t.entrada !== entrada) continue
+    if (!melhor || t.inscritos > melhor.inscritos || (t.inscritos === melhor.inscritos && t.criadoEm < melhor.criadoEm)) melhor = t
+  }
+  if (melhor) return entrarTorneio(usuario, melhor.id)
+  return criarTorneio(usuario, {
+    nome: `Relâmpago · ${times} ${formato === 'duplas' ? 'duplas' : 'jogadores'}`,
+    variante: op.variante,
+    formato,
+    times,
+    entrada,
+    percentuais: premiosRelampago(times),
+    privada: false,
+    vouJogar: true,
+    relampago: true,
+  })
 }
 
 export function entrarTorneio(usuario, id, op = {}) {
@@ -329,6 +383,8 @@ export function sairTorneio(usuario, id) {
   const v = t.vagas[lugar.time][lugar.vaga]
   t.vagas[lugar.time][lugar.vaga] = null
   if (v.reservaId) devolverReserva(v.reservaId, `Você saiu da sala "${t.nome}" — inscrição devolvida`)
+  // Relâmpago que ficou vazio deixa de existir.
+  if (t.relampago && t.inscritos === 0) encerrarComDevolucao(t, 'Todos saíram do relâmpago')
   avisos.torneio(t)
   avisos.lobby()
 }
@@ -336,6 +392,7 @@ export function sairTorneio(usuario, id) {
 export function cancelarTorneio(usuario, id, motivo = null) {
   const t = torneios.get(id)
   if (!t) throw new ErroUsuario('Sala não encontrada.', 404)
+  if (t.relampago && !usuario.admin) throw new ErroUsuario('O torneio relâmpago não pode ser cancelado. Se quiser, saia dele.', 403)
   if (!usuario.admin && usuario.id !== t.criadorId) throw new ErroUsuario('Só quem criou a sala pode cancelar.', 403)
   if (t.status !== 'inscricoes' && !usuario.admin) throw new ErroUsuario('A sala já começou e não pode mais ser cancelada.')
   encerrarComDevolucao(t, motivo || (usuario.admin ? 'Sala cancelada pela administração' : 'Sala cancelada por quem criou'))
@@ -422,7 +479,7 @@ function iniciarJogo(t, jogo, pa, pb) {
   // Assentos alternados: dupla A nos lugares 0 e 2, dupla B nos lugares 1 e 3.
   const ordemAssentos = jogadores === 4 ? [timeA[0], timeB[0], timeA[1], timeB[1]] : [timeA[0], timeB[0]]
   ordemAssentos.forEach((v, i) => {
-    mesa.assentos[i] = { usuarioId: v.usuarioId, apelido: v.apelido, bot: false, reservaId: null }
+    mesa.assentos[i] = { usuarioId: v.usuarioId, apelido: v.apelido, avatar: v.avatar || null, bot: false, reservaId: null }
   })
   jogo.status = 'jogando'
   jogo.mesaId = mesa.id
@@ -498,8 +555,9 @@ export function faxinaTorneios(agora = Date.now()) {
       torneios.delete(t.id)
       continue
     }
-    if (t.status === 'inscricoes' && agora - t.criadoEm > 24 * 3600_000) {
-      encerrarComDevolucao(t, 'A sala não completou em 24 horas')
+    const limite = t.relampago ? 2 * 3600_000 : 24 * 3600_000
+    if (t.status === 'inscricoes' && agora - t.criadoEm > limite) {
+      encerrarComDevolucao(t, t.relampago ? 'O relâmpago não lotou em 2 horas' : 'A sala não completou em 24 horas')
     }
   }
 }

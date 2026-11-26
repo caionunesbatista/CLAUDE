@@ -15,7 +15,7 @@ function Bloco({ numero, titulo, children, dica }) {
   return (
     <div className="cartao p-5 sm:p-6">
       <div className="mb-4 flex items-center gap-3">
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-ouro/15 text-sm font-black text-ouro">{numero}</span>
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-marca/15 text-sm font-black text-marca-forte">{numero}</span>
         <h2 className="titulo text-lg">{titulo}</h2>
       </div>
       {children}
@@ -231,7 +231,7 @@ export default function CriarSala() {
                     <TabelaPremios calculo={calculo} percentuais={percentuais} porTime={porTime} compacta />
                   ) : (
                     <p className="flex items-center gap-2 rounded-xl bg-fundo/60 px-4 py-3 text-sm text-suave">
-                      <Trophy size={16} className="text-ouro" /> Sala grátis: vale a glória.
+                      <Trophy size={16} className="text-marca-forte" /> Sala grátis: vale a glória.
                     </p>
                   )}
                 </>
@@ -243,7 +243,7 @@ export default function CriarSala() {
                   Seu saldo ({formatarReais(saldo)}) não cobre a sua inscrição. Deposite ou desmarque “Vou jogar”.
                 </p>
               )}
-              <button className="btn btn-ouro btn-grande w-full" disabled={!podeCriar} onClick={criar}>
+              <button className="btn btn-primario btn-grande w-full" disabled={!podeCriar} onClick={criar}>
                 {enviando ? 'Criando...' : 'Criar sala'}
               </button>
               {!nomeValido && <p className="text-center text-xs text-apagado">Dê um nome para a sala (mínimo 3 letras).</p>}

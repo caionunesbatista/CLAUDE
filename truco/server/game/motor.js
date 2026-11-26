@@ -136,21 +136,35 @@ export class Partida {
       especial,
       timeEspecial,
       resultados: [],
+      // Mão de ferro (as duas duplas no limite): a mesa vota se joga normal ou nas escuras.
+      votos: especial === 'ferro' ? Array(this.n).fill(null) : null,
+      escuro: null,
     }
     this.ultimoResultado = null
-    this.fase = especial === 'onze' ? 'onze' : 'jogando'
+    this.fase = especial === 'onze' ? 'onze' : especial === 'ferro' ? 'votoFerro' : 'jogando'
     this.evento('novaMao', { maoNum: this.maoNum, especial, timeEspecial })
   }
 
-  /** Quem precisa agir agora: { assento } ou { time }. */
+  /** Votos necessários para jogar a mão de ferro nas escuras: 3 de 4 nas duplas, os 2 no 1x1. */
+  votosParaEscuro() {
+    return this.n === 4 ? 3 : 2
+  }
+
+  /**
+   * Quem precisa agir agora. Sempre traz `assentos` (lista de quem pode agir);
+   * também `assento` (vez de jogar) ou `time` (decisão da dupla).
+   */
   aguardando() {
+    const m = this.mao
     switch (this.fase) {
       case 'jogando':
-        return { assento: this.mao.vez }
+        return { assento: m.vez, assentos: [m.vez] }
       case 'resposta':
-        return { time: 1 - this.mao.pedido.porTime }
+        return { time: 1 - m.pedido.porTime, assentos: this.assentosDoTime(1 - m.pedido.porTime) }
       case 'onze':
-        return { time: this.mao.timeEspecial }
+        return { time: m.timeEspecial, assentos: this.assentosDoTime(m.timeEspecial) }
+      case 'votoFerro':
+        return { assentos: m.votos.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0) }
       default:
         return null
     }
@@ -172,10 +186,13 @@ export class Partida {
     return false
   }
 
+  /** Mão de ferro decidida por votação para ser jogada às cegas. */
+  get maoAsCegas() {
+    return this.mao?.especial === 'ferro' && this.mao.escuro === true
+  }
+
   podeCobrir(assento) {
-    return (
-      this.fase === 'jogando' && this.mao.vez === assento && this.mao.especial !== 'ferro' && this.mao.vazas.length >= 1
-    )
+    return this.fase === 'jogando' && this.mao.vez === assento && !this.maoAsCegas && this.mao.vazas.length >= 1
   }
 
   /** Executa a ação de um jogador. Lança ErroJogo se a ação não for permitida. */
@@ -193,8 +210,28 @@ export class Partida {
         return this.responder(assento, false)
       case 'onze':
         return this.decidirOnze(assento, acao.jogar === true)
+      case 'votoFerro':
+        return this.votarFerro(assento, acao.escuro === true)
       default:
         throw new ErroJogo('Ação desconhecida.')
+    }
+  }
+
+  votarFerro(assento, escuro) {
+    const m = this.mao
+    if (this.fase !== 'votoFerro') throw new ErroJogo('Não há votação agora.')
+    if (m.votos[assento] !== null) throw new ErroJogo('Você já votou.')
+    m.votos[assento] = escuro ? 'escuro' : 'normal'
+    this.evento('votoFerro', { assento, escuro })
+    const necessarios = this.votosParaEscuro()
+    const sim = m.votos.filter((v) => v === 'escuro').length
+    const nao = m.votos.filter((v) => v === 'normal').length
+    // Decide assim que o resultado não pode mais mudar.
+    if (sim >= necessarios) m.escuro = true
+    else if (nao > this.n - necessarios) m.escuro = false
+    if (m.escuro !== null) {
+      this.fase = 'jogando'
+      this.evento('ferroDecidido', { escuro: m.escuro, sim, nao })
     }
   }
 
@@ -264,8 +301,8 @@ export class Partida {
     const mao = m.cartas[assento]
     let indice
     let coberta = false
-    if (m.especial === 'ferro') {
-      // Mão de ferro: ninguém vê as próprias cartas; escolhe-se a posição.
+    if (this.maoAsCegas) {
+      // Mão de ferro nas escuras: ninguém vê as próprias cartas; escolhe-se a posição.
       indice = Number.isInteger(acao.indice) ? acao.indice : -1
     } else {
       indice = mao.findIndex((c) => c.id === acao.carta)
@@ -356,9 +393,12 @@ export class Partida {
         return { assento: this.assentosDoTime(m.timeEspecial)[0], acao: { tipo: 'onze', jogar: false } }
       case 'resposta':
         return { assento: this.assentosDoTime(1 - m.pedido.porTime)[0], acao: { tipo: 'correr' } }
+      case 'votoFerro':
+        // Quem não votou a tempo vota por jogar normal.
+        return { assento: m.votos.indexOf(null), acao: { tipo: 'votoFerro', escuro: false } }
       case 'jogando': {
         const assento = m.vez
-        if (m.especial === 'ferro') return { assento, acao: { tipo: 'jogar', indice: 0 } }
+        if (this.maoAsCegas) return { assento, acao: { tipo: 'jogar', indice: 0 } }
         const mao = m.cartas[assento]
         let menor = mao[0]
         for (const c of mao) if (this.forca(c) < this.forca(menor)) menor = c
@@ -372,7 +412,7 @@ export class Partida {
   /** O que o jogador do assento pode fazer agora. */
   acoesDisponiveis(assento) {
     const m = this.mao
-    const nada = { jogar: false, cobrir: false, aumentar: false, responder: false, decidirOnze: false }
+    const nada = { jogar: false, cobrir: false, aumentar: false, responder: false, decidirOnze: false, votarFerro: false }
     if (!m || assento === null || assento === undefined) return nada
     const meuTime = this.time(assento)
     return {
@@ -381,6 +421,7 @@ export class Partida {
       aumentar: this.podeAumentar(assento),
       responder: this.fase === 'resposta' && meuTime !== m.pedido.porTime,
       decidirOnze: this.fase === 'onze' && meuTime === m.timeEspecial,
+      votarFerro: this.fase === 'votoFerro' && m.votos[assento] === null,
     }
   }
 
@@ -409,7 +450,9 @@ export class Partida {
     let minhasCartas = null
     let cartasParceiro = null
     if (ehJogador) {
-      if (m.especial === 'ferro' && this.fase !== 'fim') {
+      // Na mão de ferro as cartas ficam viradas durante a votação e, se a mesa escolher, a mão inteira.
+      const asCegas = m.especial === 'ferro' && (this.fase === 'votoFerro' || m.escuro === true) && this.fase !== 'fim'
+      if (asCegas) {
         minhasCartas = m.cartas[assento].map((_, i) => ({ oculta: true, indice: i }))
       } else {
         minhasCartas = m.cartas[assento].map((c) => ({ ...c }))
@@ -444,6 +487,9 @@ export class Partida {
             ? { nome: this.regras.pedidos[proximoDegrau], valor: this.regras.escada[proximoDegrau] }
             : null,
         ultimoAumento: m.ultimoAumento,
+        votos: m.votos ? [...m.votos] : null,
+        escuro: m.escuro,
+        votosParaEscuro: this.votosParaEscuro(),
         vazas: m.vazas.map((v) => ({
           lider: v.lider,
           resultado: v.resultado,

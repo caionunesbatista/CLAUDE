@@ -34,7 +34,7 @@ rotasPublicas.get(
   rota((_req, res) => {
     const lista = db()
       .prepare(
-        `SELECT u.apelido, SUM(pj.venceu) AS vitorias, COUNT(*) AS partidas, SUM(pj.premio) AS ganhos
+        `SELECT u.apelido, u.avatar, SUM(pj.venceu) AS vitorias, COUNT(*) AS partidas, SUM(pj.premio) AS ganhos
          FROM partida_jogadores pj
          JOIN partidas p ON p.id = pj.partida_id
          JOIN usuarios u ON u.id = pj.usuario_id

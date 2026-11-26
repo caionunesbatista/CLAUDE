@@ -7,7 +7,7 @@ import { CampoReais, Carregando, Dinheiro, Vazio, useTitulo } from '../component
 import { site } from '../config/site.js'
 
 const STATUS = {
-  pendente: { texto: 'Aguardando', icone: Clock, cor: 'text-ouro' },
+  pendente: { texto: 'Aguardando', icone: Clock, cor: 'text-marca-forte' },
   aprovado: { texto: 'Confirmado', icone: CircleCheck, cor: 'text-dinheiro' },
   pago: { texto: 'Pago', icone: CircleCheck, cor: 'text-dinheiro' },
   recusado: { texto: 'Recusado', icone: XCircle, cor: 'text-truco' },
@@ -62,9 +62,9 @@ function Depositar({ dados, recarregar }) {
   if (pedido) {
     return (
       <div className="animar-surgir space-y-4">
-        <div className="rounded-2xl border border-ouro/40 bg-ouro/5 p-5">
+        <div className="rounded-2xl border border-marca/40 bg-marca/5 p-5">
           <p className="text-sm text-suave">Faça um PIX de</p>
-          <p className="numero titulo text-4xl text-ouro">{formatarReais(pedido.valor)}</p>
+          <p className="numero titulo text-4xl text-marca-forte">{formatarReais(pedido.valor)}</p>
           <dl className="mt-5 space-y-3 text-sm">
             <div>
               <dt className="text-xs text-apagado">Chave PIX ({pedido.pix.tipo})</dt>
@@ -159,7 +159,7 @@ function Sacar({ dados, recarregar }) {
           <CampoReais id="valor-saque" valor={valor} aoMudar={setValor} />
           <div className="mt-1.5 flex justify-between text-xs text-apagado">
             <span>Mínimo {formatarReais(minimo)}</span>
-            <button className="font-semibold text-ouro hover:underline" onClick={() => setValor(saldo)}>
+            <button className="font-semibold text-marca-forte hover:underline" onClick={() => setValor(saldo)}>
               Sacar tudo ({formatarReais(saldo)})
             </button>
           </div>
@@ -170,7 +170,7 @@ function Sacar({ dados, recarregar }) {
           <p className="mt-1.5 text-xs text-apagado">A conta precisa estar no seu nome (mesmo CPF do cadastro).</p>
         </div>
       </div>
-      <button className="btn btn-ouro btn-grande w-full sm:w-auto" disabled={enviando || !valido} onClick={sacar}>
+      <button className="btn btn-primario btn-grande w-full sm:w-auto" disabled={enviando || !valido} onClick={sacar}>
         <ArrowUpFromLine size={20} /> Solicitar saque
       </button>
       <Lista titulo="Seus saques" itens={dados.saques} tipo="saque" />
@@ -258,7 +258,7 @@ export default function Carteira() {
   ]
   return (
     <section className="mx-auto max-w-3xl px-4 py-8">
-      <div className="feltro relative overflow-hidden rounded-3xl border border-ouro/25 p-6 sm:p-8">
+      <div className="feltro relative overflow-hidden rounded-3xl border border-marca/25 p-6 sm:p-8">
         <p className="text-sm font-semibold text-white/70">Saldo disponível</p>
         <Dinheiro valor={saldo} className="titulo mt-1 block text-5xl text-white" />
         <p className="mt-2 text-xs text-white/60">Valores em mesas e salas em andamento ficam retidos até o fim da partida.</p>

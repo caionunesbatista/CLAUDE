@@ -41,6 +41,11 @@ export function decidirBot(partida, assento, { aleatorio = randomInt, timeTemHum
     return { tipo: 'correr' }
   }
 
+  if (acoes.votarFerro) {
+    // Sem ver as cartas, o bot topa o escuro metade das vezes.
+    return { tipo: 'votoFerro', escuro: chance(50, aleatorio) }
+  }
+
   if (!acoes.jogar) return null
 
   if (acoes.aumentar) {
@@ -49,7 +54,7 @@ export function decidirBot(partida, assento, { aleatorio = randomInt, timeTemHum
     if (chance(4, aleatorio)) return { tipo: 'aumentar' } // blefe ocasional
   }
 
-  if (m.especial === 'ferro') return { tipo: 'jogar', indice: 0 }
+  if (partida.maoAsCegas) return { tipo: 'jogar', indice: 0 }
 
   const ordenadas = [...minhas].sort((a, b) => partida.forca(a) - partida.forca(b))
   const jogadas = m.vazaAtual.jogadas.filter((j) => !j.coberta)

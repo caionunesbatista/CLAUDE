@@ -40,7 +40,7 @@ export function Modal({ aberto, aoFechar, titulo, children, largura = 'max-w-md'
         className={`cartao animar-surgir max-h-[92dvh] w-full ${largura} overflow-y-auto rounded-b-none p-5 outline-none sm:rounded-b-[18px] sm:p-6`}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 className="titulo text-xl">{titulo}</h2>
+          <h2 className="titulo text-3xl">{titulo}</h2>
           {aoFechar && (
             <button className="btn btn-fantasma btn-pequeno -mr-2 -mt-1 px-2" onClick={aoFechar} aria-label="Fechar">
               <X size={20} />
@@ -153,7 +153,7 @@ export function Interruptor({ ligado, aoMudar, rotulo, descricao }) {
         <span className="block font-semibold">{rotulo}</span>
         {descricao && <span className="block text-sm text-suave">{descricao}</span>}
       </span>
-      <span className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${ligado ? 'bg-ouro' : 'bg-painel-3'}`}>
+      <span className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${ligado ? 'bg-marca' : 'bg-painel-3'}`}>
         <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${ligado ? 'left-6' : 'left-1'}`} />
       </span>
     </button>

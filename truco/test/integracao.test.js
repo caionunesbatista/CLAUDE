@@ -84,6 +84,7 @@ function jogadorAutomatico(jogador, { aumentarAs = 0.15 } = {}) {
     const a = m.jogo.acoes
     let acao = null
     if (a.decidirOnze) acao = { tipo: 'onze', jogar: Math.random() < 0.5 }
+    else if (a.votarFerro) acao = { tipo: 'votoFerro', escuro: Math.random() < 0.5 }
     else if (a.responder) acao = Math.random() < 0.6 ? { tipo: 'aceitar' } : a.aumentar && Math.random() < 0.3 ? { tipo: 'aumentar' } : { tipo: 'correr' }
     else if (a.jogar) {
       if (a.aumentar && Math.random() < aumentarAs) acao = { tipo: 'aumentar' }
@@ -401,4 +402,114 @@ test('servidor reiniciado no meio da partida: todo valor retido volta para os jo
   assert.equal(totalRetido(), 0)
   const { mesas } = await import('../server/salas/central.js')
   mesas.get(criada.dados.id).cancelar('teste')
+})
+
+test('torneio relâmpago de 4 jogadores: junta quem chega e paga o campeão', async () => {
+  const jogadores = []
+  for (let i = 0; i < 4; i++) jogadores.push(await novoJogador(3000))
+  const sockets = jogadores.map((j) => jogadorAutomatico(j))
+  await esperar(150)
+  const comissaoAntes = totalComissoes()
+  const ids = []
+  for (const j of jogadores) {
+    const r = await api('POST', '/api/torneios/relampago', { variante: 'mineiro', formato: 'individual', times: 4, entrada: 500 }, j.cookie)
+    assert.equal(r.status, 200, JSON.stringify(r.dados))
+    ids.push(r.dados.id)
+  }
+  assert.equal(new Set(ids).size, 1, 'os quatro caem no mesmo relâmpago')
+  const { torneios } = await import('../server/salas/central.js')
+  const t = torneios.get(ids[0])
+  assert.equal(t.relampago, true)
+  assert.equal(t.status, 'andamento')
+  // Ninguém cancela um relâmpago (só a administração).
+  const cancelar = await api('POST', `/api/torneios/${t.id}/cancelar`, {}, jogadores[0].cookie)
+  assert.equal(cancelar.status, 403)
+  await esperarAte(() => t.status === 'encerrado', 120000)
+  // Pote 20,00 − 10% = 18,00 para o campeão.
+  const campeao = t.vagas[t.colocacao[0].time][0].usuarioId
+  for (const j of jogadores) assert.equal(saldo(j.id), j.id === campeao ? 3000 - 500 + 1800 : 2500)
+  assert.equal(totalComissoes() - comissaoAntes, 200)
+  for (const s of sockets) s.close()
+})
+
+test('relâmpago de duplas forma duplas com quem chegar; sair deixa a vaga e devolve', async () => {
+  const a = await novoJogador(2000)
+  const b = await novoJogador(2000)
+  const ra = await api('POST', '/api/torneios/relampago', { variante: 'paulista', formato: 'duplas', times: 4, entrada: 300 }, a.cookie)
+  const rb = await api('POST', '/api/torneios/relampago', { variante: 'paulista', formato: 'duplas', times: 4, entrada: 300 }, b.cookie)
+  assert.equal(ra.dados.id, rb.dados.id)
+  const { torneios } = await import('../server/salas/central.js')
+  const t = torneios.get(ra.dados.id)
+  assert.equal(t.vagas[0][0].usuarioId, a.id)
+  assert.equal(t.vagas[0][1].usuarioId, b.id, 'o segundo completa a dupla do primeiro (parceiro aleatório)')
+  await api('POST', `/api/torneios/${t.id}/sair`, {}, a.cookie)
+  await api('POST', `/api/torneios/${t.id}/sair`, {}, b.cookie)
+  assert.equal(saldo(a.id), 2000)
+  assert.equal(saldo(b.id), 2000)
+  assert.equal(t.status, 'cancelado', 'relâmpago vazio deixa de existir')
+})
+
+test('revanche: os dois pedem, nova mesa começa e cada um paga a entrada de novo', async () => {
+  const a = await novoJogador(5000)
+  const b = await novoJogador(5000)
+  const sa = jogadorAutomatico(a)
+  const sb = jogadorAutomatico(b)
+  const criada = await api('POST', '/api/mesas', { variante: 'paulista', jogadores: 2, aposta: 1000 }, a.cookie)
+  sa.emit('mesa:entrar', criada.dados.id)
+  sb.emit('mesa:entrar', criada.dados.id)
+  await api('POST', `/api/mesas/${criada.dados.id}/entrar`, {}, b.cookie)
+  const { mesas } = await import('../server/salas/central.js')
+  const mesa = mesas.get(criada.dados.id)
+  await esperarAte(() => mesa.status === 'encerrada')
+  const antesA = saldo(a.id)
+  const antesB = saldo(b.id)
+  const v1 = await api('POST', `/api/mesas/${mesa.id}/revanche`, {}, a.cookie)
+  assert.equal(v1.dados.novaMesa, null, 'espera o outro jogador')
+  const v2 = await api('POST', `/api/mesas/${mesa.id}/revanche`, {}, b.cookie)
+  assert.ok(v2.dados.novaMesa)
+  const nova = mesas.get(v2.dados.novaMesa)
+  assert.equal(nova.status, 'jogando')
+  assert.equal(nova.assentos[0].usuarioId, mesa.assentos[0].usuarioId, 'mesmos lugares')
+  assert.equal(saldo(a.id), antesA - 1000)
+  assert.equal(saldo(b.id), antesB - 1000)
+  sa.emit('mesa:entrar', nova.id)
+  sb.emit('mesa:entrar', nova.id)
+  await esperarAte(() => nova.status === 'encerrada')
+  sa.close()
+  sb.close()
+})
+
+test('revanche sem saldo de um jogador não acontece e não revela o saldo dele', async () => {
+  const a = await novoJogador(1000)
+  const b = await novoJogador(5000)
+  const sa = jogadorAutomatico(a)
+  const sb = jogadorAutomatico(b)
+  const criada = await api('POST', '/api/mesas', { variante: 'mineiro', jogadores: 2, aposta: 1000 }, a.cookie)
+  sa.emit('mesa:entrar', criada.dados.id)
+  sb.emit('mesa:entrar', criada.dados.id)
+  await api('POST', `/api/mesas/${criada.dados.id}/entrar`, {}, b.cookie)
+  const { mesas } = await import('../server/salas/central.js')
+  const mesa = mesas.get(criada.dados.id)
+  await esperarAte(() => mesa.status === 'encerrada')
+  // Se `a` perdeu, fica com 0 e não paga a revanche; se ganhou, quem fica sem é ninguém — então zera `a` para forçar o caso.
+  db().prepare('UPDATE usuarios SET saldo = 0 WHERE id = ?').run(a.id)
+  const antesB = saldo(b.id)
+  await api('POST', `/api/mesas/${mesa.id}/revanche`, {}, b.cookie)
+  const r = await api('POST', `/api/mesas/${mesa.id}/revanche`, {}, a.cookie)
+  assert.equal(r.dados.novaMesa, null)
+  assert.match(mesa.revanche.recusada, /não tem saldo/)
+  assert.ok(!/R\$/.test(mesa.revanche.recusada), 'a mensagem não mostra valores')
+  assert.equal(saldo(b.id), antesB, 'quem pagou primeiro recebe de volta')
+  assert.equal(totalRetido(), 0)
+  sa.close()
+  sb.close()
+})
+
+test('perfil: troca de avatar só aceita avatares da lista', async () => {
+  const j = await novoJogador(0)
+  const ok = await api('PUT', '/api/perfil', { avatar: 'coelho' }, j.cookie)
+  assert.equal(ok.status, 200)
+  assert.equal(ok.dados.usuario.avatar, 'coelho')
+  const ruim = await api('PUT', '/api/perfil', { avatar: '<script>' }, j.cookie)
+  assert.equal(ruim.status, 400)
 })

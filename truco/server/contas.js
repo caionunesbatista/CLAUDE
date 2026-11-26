@@ -107,6 +107,7 @@ export function usuarioPublico(u) {
     email: u.email,
     saldo: u.saldo,
     chavePix: u.chave_pix || '',
+    avatar: u.avatar || null,
     admin: Boolean(u.admin),
     criadoEm: u.criado_em,
   }

@@ -131,9 +131,9 @@ function Indicador({ icone: I, rotulo, valor, destaque, extra }) {
   return (
     <div className="cartao p-4">
       <div className="flex items-center gap-2 text-xs font-semibold text-suave">
-        <I size={15} className={destaque ? 'text-ouro' : 'text-apagado'} /> {rotulo}
+        <I size={15} className={destaque ? 'text-marca-forte' : 'text-apagado'} /> {rotulo}
       </div>
-      <p className={`numero titulo mt-2 text-2xl ${destaque ? 'text-ouro' : ''}`}>{valor}</p>
+      <p className={`numero titulo mt-2 text-2xl ${destaque ? 'text-marca-forte' : ''}`}>{valor}</p>
       {extra && <p className="mt-0.5 text-xs text-apagado">{extra}</p>}
     </div>
   )
@@ -157,8 +157,8 @@ function Resumo({ irPara }) {
       {(r.depositosPendentes > 0 || r.saquesPendentes > 0) && (
         <div className="grid gap-3 sm:grid-cols-2">
           {r.depositosPendentes > 0 && (
-            <button className="cartao flex items-center gap-3 border-ouro/50 p-4 text-left" onClick={() => irPara('depositos')}>
-              <ArrowDownToLine className="text-ouro" />
+            <button className="cartao flex items-center gap-3 border-marca/50 p-4 text-left" onClick={() => irPara('depositos')}>
+              <ArrowDownToLine className="text-marca-forte" />
               <span className="flex-1 font-semibold">{r.depositosPendentes} depósito(s) aguardando confirmação</span>
             </button>
           )}
@@ -313,7 +313,7 @@ function Saques() {
                   CPF {mascararCpf(s.cpf)} · {formatarData(s.criadoEm)}
                 </p>
               </div>
-              <button className="flex items-center gap-1.5 rounded-lg bg-fundo px-2.5 py-1.5 font-mono text-xs hover:text-ouro" onClick={async () => (await copiar(s.chavePix)) && avisar.sucesso('Chave copiada')}>
+              <button className="flex items-center gap-1.5 rounded-lg bg-fundo px-2.5 py-1.5 font-mono text-xs hover:text-marca-forte" onClick={async () => (await copiar(s.chavePix)) && avisar.sucesso('Chave copiada')}>
                 {s.chavePix} <Copy size={13} />
               </button>
               {s.status === 'pendente' && (
@@ -394,7 +394,7 @@ function Jogadores() {
                 <tr key={u.id} className={u.bloqueado ? 'opacity-50' : ''}>
                   <td className="py-2.5 pr-3">
                     <p className="font-semibold">
-                      {u.apelido} {u.admin ? <span className="selo ml-1 bg-ouro/15 text-ouro">admin</span> : null}
+                      {u.apelido} {u.admin ? <span className="selo ml-1 bg-marca/15 text-marca-forte">admin</span> : null}
                       {u.bloqueado ? <span className="selo ml-1 bg-truco/15 text-truco">bloqueado</span> : null}
                     </p>
                     <p className="text-xs text-apagado">
@@ -439,7 +439,7 @@ function Jogadores() {
         <CampoReais valor={valor} aoMudar={setValor} />
         <input className="campo mt-3" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo (obrigatório)" />
         <button
-          className="btn btn-ouro mt-4 w-full"
+          className="btn btn-primario mt-4 w-full"
           disabled={!Number.isFinite(valor) || valor <= 0 || motivo.trim().length < 3}
           onClick={() =>
             executar(`/admin/usuarios/${ajuste.id}/ajuste`, { valor: tipo === 'credito' ? valor : -valor, motivo }, 'Saldo ajustado.', () => {
@@ -673,7 +673,7 @@ function Configuracoes() {
           </Campo>
         </div>
       </div>
-      <button className="btn btn-ouro btn-grande" onClick={salvar}>
+      <button className="btn btn-primario btn-grande" onClick={salvar}>
         Salvar configurações
       </button>
     </div>

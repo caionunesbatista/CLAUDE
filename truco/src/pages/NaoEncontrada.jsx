@@ -11,7 +11,7 @@ export default function NaoEncontrada() {
       </div>
       <h1 className="titulo text-3xl">Essa carta não está no baralho</h1>
       <p className="mt-3 text-suave">A página que você procurou não existe ou foi encerrada.</p>
-      <Link to="/" className="btn btn-ouro mt-8">
+      <Link to="/" className="btn btn-primario mt-8">
         Voltar para o início
       </Link>
     </section>

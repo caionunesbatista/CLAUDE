@@ -1,125 +1,130 @@
 @import 'tailwindcss';
 
-/* ───── Fontes (hospedadas no próprio site) ───── */
-@font-face {
-  font-family: 'Archivo';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url(/fonts/archivo-normal-latin-ext.woff2) format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Archivo';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url(/fonts/archivo-normal-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url(/fonts/inter-normal-latin-ext.woff2) format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url(/fonts/inter-normal-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* ───── Tokens de design ─────
-   Identidade "noite de boteco": fundo grafite-azulado, feltro verde-petróleo,
-   dourado do Zap como cor principal e vermelho do Truco para os momentos de tensão. */
+/* ───── Identidade visual ─────
+   Azul-royal (feltro, marca) + vermelho Truco (ações, emoção) sobre um azul-marinho profundo.
+   Tipografia esportiva: Barlow Condensed nos títulos e placares, Barlow no texto. */
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Archivo', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', ui-sans-serif, system-ui, sans-serif;
 
-  --color-fundo: #0b0e13;
-  --color-painel: #12161e;
-  --color-painel-2: #181d27;
-  --color-painel-3: #202735;
-  --color-linha: #262e3d;
-  --color-linha-forte: #34405a;
-  --color-texto: #eef1f6;
-  --color-suave: #9aa5b8;
-  --color-apagado: #6b768a;
+  --color-fundo: #060b19;
+  --color-painel: #0c1429;
+  --color-painel-2: #111c37;
+  --color-painel-3: #18264a;
+  --color-linha: #1d2b50;
+  --color-linha-forte: #2a3c6c;
+  --color-texto: #eef2fb;
+  --color-suave: #9fb0d4;
+  --color-apagado: #6a7aa3;
 
-  --color-ouro: #f6c344;
-  --color-ouro-forte: #ffd65e;
-  --color-ouro-escuro: #b98a12;
-  --color-truco: #ff4d5e;
-  --color-truco-escuro: #c92a3b;
-  --color-dinheiro: #3ddc97;
-  --color-info: #5aa9ff;
+  /* Vermelho da marca (botões principais, "TRUCO!", destaques) */
+  --color-marca: #e5243b;
+  --color-marca-forte: #ff3d52;
+  --color-marca-escura: #a8142b;
+  /* Azul (segunda cor da marca, adversários, informação) */
+  --color-azul: #2f6bff;
+  --color-azul-claro: #8db4ff;
+  /* Dourado só para manilhas e troféus */
+  --color-ouro: #f2c14e;
+  --color-ouro-forte: #ffd772;
+  --color-ouro-escuro: #b8861b;
+  --color-dinheiro: #22c983;
+  /* Aliases usados em partes do código */
+  --color-truco: #e5243b;
+  --color-truco-escuro: #a8142b;
+  --color-info: #8db4ff;
 
-  --color-feltro: #0f5546;
-  --color-feltro-escuro: #08342b;
-  --color-carta: #fffaf0;
-  --color-carta-vermelho: #d4283a;
-  --color-carta-preto: #1b1d22;
-
-  --radius-carta: 10px;
+  --color-feltro: #1b52c0;
+  --color-feltro-escuro: #0a2260;
+  --color-carta: #fbf7ee;
+  --color-carta-vermelho: #d21f35;
+  --color-carta-preto: #141824;
 }
 
-/* ───── Base ─────
-   Fica dentro de @layer base para não sobrescrever as cores dos componentes (.btn-ouro etc.). */
 @layer base {
-html {
-  background: var(--color-fundo);
-  color: var(--color-texto);
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-}
-body {
-  min-height: 100dvh;
-  font-family: var(--font-sans);
-  background:
-    radial-gradient(1200px 600px at 85% -10%, rgb(246 195 68 / 0.07), transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, rgb(15 85 70 / 0.35), transparent 60%),
-    var(--color-fundo);
-  background-attachment: fixed;
-}
-::selection {
-  background: rgb(246 195 68 / 0.35);
-}
-:focus-visible {
-  outline: 2px solid var(--color-ouro);
-  outline-offset: 2px;
-}
-input,
-select,
-textarea,
-button {
-  font: inherit;
-  color: inherit;
-}
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+  html {
+    background: var(--color-fundo);
+    color: var(--color-texto);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    background:
+      radial-gradient(1100px 520px at 100% -8%, rgb(229 36 59 / 0.1), transparent 60%),
+      radial-gradient(1000px 600px at -10% 0%, rgb(47 107 255 / 0.14), transparent 60%),
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 9px),
+      var(--color-fundo);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgb(229 36 59 / 0.4);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-azul-claro);
+    outline-offset: 2px;
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
-/* ───── Componentes ───── */
 @layer components {
+  /* Títulos: condensados, caixa-alta, compactos */
   .titulo {
     font-family: var(--font-display);
     font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    line-height: 0.95;
+  }
+  /* Título de seção com a "faixa" vermelha inclinada, assinatura da marca */
+  .titulo-secao {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .titulo-secao::before {
+    content: '';
+    width: 0.5rem;
+    height: 1.05em;
+    background: var(--color-marca);
+    transform: skewX(-18deg);
+    flex-shrink: 0;
+  }
+  .sobretitulo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-marca-forte);
   }
 
   .cartao {
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.025), transparent 40%), var(--color-painel);
+    background: var(--color-painel);
     border: 1px solid var(--color-linha);
-    border-radius: 18px;
+    border-radius: 16px;
+  }
+  .cartao-claro {
+    background: var(--color-painel-2);
+    border: 1px solid var(--color-linha-forte);
+    border-radius: 14px;
   }
 
   .btn {
@@ -127,50 +132,63 @@ input[type='number']::-webkit-inner-spin-button {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-height: 44px;
-    padding: 0 1.15rem;
-    border-radius: 12px;
+    min-height: 46px;
+    padding: 0 1.2rem;
+    border-radius: 10px;
+    font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1.02rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     transition:
       transform 0.12s ease,
       background-color 0.15s ease,
       border-color 0.15s ease,
+      box-shadow 0.15s ease,
       opacity 0.15s;
     white-space: nowrap;
     user-select: none;
     cursor: pointer;
   }
   .btn:active:not(:disabled) {
-    transform: translateY(1px) scale(0.99);
+    transform: translateY(1px);
   }
   .btn:disabled {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
   }
-  .btn-ouro {
-    background: linear-gradient(180deg, var(--color-ouro-forte), var(--color-ouro));
-    color: #1a1406;
-    box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.4) inset,
-      0 8px 24px -10px rgb(246 195 68 / 0.6);
-  }
-  .btn-ouro:hover:not(:disabled) {
-    background: linear-gradient(180deg, #ffe08a, var(--color-ouro-forte));
-  }
+  /* Principal: vermelho */
+  .btn-primario,
   .btn-truco {
-    background: linear-gradient(180deg, #ff6a78, var(--color-truco));
+    background: var(--color-marca);
     color: #fff;
     box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.3) inset,
-      0 10px 28px -10px rgb(255 77 94 / 0.8);
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      inset 0 -2px 0 rgb(0 0 0 / 0.18),
+      0 6px 18px -8px rgb(229 36 59 / 0.7);
   }
+  .btn-primario:hover:not(:disabled),
   .btn-truco:hover:not(:disabled) {
-    background: linear-gradient(180deg, #ff808c, #ff5b6b);
+    background: var(--color-marca-forte);
+  }
+  /* Azul */
+  .btn-azul {
+    background: var(--color-azul);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      inset 0 -2px 0 rgb(0 0 0 / 0.2);
+  }
+  .btn-azul:hover:not(:disabled) {
+    background: #4a80ff;
   }
   .btn-verde {
-    background: linear-gradient(180deg, #5ce8ab, var(--color-dinheiro));
-    color: #04281a;
+    background: var(--color-dinheiro);
+    color: #032617;
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.15);
+  }
+  .btn-verde:hover:not(:disabled) {
+    background: #36dc95;
   }
   .btn-sec {
     background: var(--color-painel-2);
@@ -179,6 +197,7 @@ input[type='number']::-webkit-inner-spin-button {
   }
   .btn-sec:hover:not(:disabled) {
     background: var(--color-painel-3);
+    border-color: #3a508a;
   }
   .btn-fantasma {
     color: var(--color-suave);
@@ -188,76 +207,85 @@ input[type='number']::-webkit-inner-spin-button {
     background: rgb(255 255 255 / 0.05);
   }
   .btn-pequeno {
-    min-height: 36px;
-    padding: 0 0.8rem;
-    font-size: 0.85rem;
-    border-radius: 10px;
+    min-height: 38px;
+    padding: 0 0.85rem;
+    font-size: 0.92rem;
+    border-radius: 9px;
   }
   .btn-grande {
-    min-height: 54px;
-    padding: 0 1.6rem;
-    font-size: 1.05rem;
-    border-radius: 14px;
+    min-height: 56px;
+    padding: 0 1.7rem;
+    font-size: 1.2rem;
+    border-radius: 12px;
   }
 
   .campo {
     width: 100%;
-    min-height: 46px;
-    padding: 0 0.9rem;
-    border-radius: 12px;
-    background: var(--color-fundo);
+    min-height: 48px;
+    padding: 0 0.95rem;
+    border-radius: 10px;
+    background: #050a17;
     border: 1px solid var(--color-linha-forte);
-    transition: border-color 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
   .campo:focus {
     outline: none;
-    border-color: var(--color-ouro);
-    box-shadow: 0 0 0 3px rgb(246 195 68 / 0.15);
+    border-color: var(--color-azul);
+    box-shadow: 0 0 0 3px rgb(47 107 255 / 0.25);
   }
   .campo::placeholder {
     color: var(--color-apagado);
   }
   .rotulo {
     display: block;
+    font-family: var(--font-display);
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--color-suave);
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.45rem;
   }
 
+  /* Opções selecionáveis (segmentos) */
   .chip {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    min-height: 40px;
-    padding: 0 0.9rem;
-    border-radius: 999px;
+    gap: 0.4rem;
+    min-height: 42px;
+    padding: 0 0.95rem;
+    border-radius: 9px;
     border: 1px solid var(--color-linha-forte);
     background: var(--color-painel-2);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.14s;
   }
-  .chip:hover {
-    border-color: var(--color-suave);
+  .chip:hover:not(:disabled) {
+    border-color: #3d5490;
+    background: var(--color-painel-3);
   }
   .chip[aria-pressed='true'] {
-    background: rgb(246 195 68 / 0.14);
-    border-color: var(--color-ouro);
-    color: var(--color-ouro-forte);
+    background: rgb(229 36 59 / 0.14);
+    border-color: var(--color-marca);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px var(--color-marca);
   }
 
   .selo {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
+    padding: 0.22rem 0.5rem;
+    border-radius: 5px;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     background: var(--color-painel-3);
     color: var(--color-suave);
@@ -267,25 +295,23 @@ input[type='number']::-webkit-inner-spin-button {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Feltro da mesa */
+  /* Feltro azul da mesa */
   .feltro {
     background:
-      radial-gradient(ellipse at 50% 45%, rgb(255 255 255 / 0.07), transparent 60%),
-      repeating-linear-gradient(45deg, rgb(255 255 255 / 0.012) 0 2px, transparent 2px 5px),
-      radial-gradient(ellipse at center, var(--color-feltro) 0%, var(--color-feltro-escuro) 78%);
+      radial-gradient(ellipse 70% 60% at 50% 42%, rgb(255 255 255 / 0.13), transparent 70%),
+      repeating-linear-gradient(60deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(-60deg, rgb(0 0 0 / 0.05) 0 1px, transparent 1px 4px),
+      radial-gradient(ellipse at center, var(--color-feltro) 0%, var(--color-feltro-escuro) 85%);
   }
-
-  /* Verso das cartas */
-  .verso-carta {
-    background:
-      radial-gradient(circle at 50% 50%, rgb(246 195 68 / 0.22) 0 18%, transparent 19%),
-      repeating-linear-gradient(45deg, rgb(246 195 68 / 0.16) 0 2px, transparent 2px 7px),
-      repeating-linear-gradient(-45deg, rgb(246 195 68 / 0.16) 0 2px, transparent 2px 7px),
-      linear-gradient(160deg, #173f37, #0b2420);
-    border: 2px solid #f3e7c9;
+  /* Borda acolchoada da mesa com costura */
+  .borda-mesa {
+    background: linear-gradient(180deg, #121b33, #070c1a);
     box-shadow:
-      inset 0 0 0 3px #0b2420,
-      inset 0 0 0 4px rgb(246 195 68 / 0.45);
+      0 30px 60px -20px rgb(0 0 0 / 0.8),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+  .costura {
+    border: 1.5px dashed rgb(255 255 255 / 0.12);
   }
 }
 
@@ -293,7 +319,7 @@ input[type='number']::-webkit-inner-spin-button {
 @keyframes surgir {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -303,11 +329,21 @@ input[type='number']::-webkit-inner-spin-button {
 @keyframes carta-entra {
   from {
     opacity: 0;
-    transform: translate(var(--de-x, 0), var(--de-y, 40px)) scale(0.85) rotate(var(--rot, 0deg));
+    transform: translate(var(--de-x, 0), var(--de-y, 40px)) scale(0.8) rotate(var(--rot-de, 0deg));
   }
   to {
     opacity: 1;
     transform: translate(0, 0) scale(1) rotate(var(--rot, 0deg));
+  }
+}
+@keyframes dar-carta {
+  from {
+    opacity: 0;
+    transform: translateY(-120px) scale(0.6) rotate(-20deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes pulso {
@@ -316,34 +352,53 @@ input[type='number']::-webkit-inner-spin-button {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.06);
+    transform: scale(1.05);
   }
 }
 @keyframes grito {
   0% {
     opacity: 0;
-    transform: scale(0.4) rotate(-8deg);
+    transform: scale(0.3) skewX(-10deg);
   }
-  55% {
+  60% {
     opacity: 1;
-    transform: scale(1.12) rotate(2deg);
+    transform: scale(1.1) skewX(-10deg);
   }
   100% {
     opacity: 1;
-    transform: scale(1) rotate(-3deg);
+    transform: scale(1) skewX(-10deg);
   }
 }
-@keyframes brilho {
+@keyframes tremer {
   0%,
   100% {
-    box-shadow:
-      0 0 0 2px var(--color-ouro),
-      0 0 18px rgb(246 195 68 / 0.5);
+    transform: translateX(0);
   }
-  50% {
-    box-shadow:
-      0 0 0 2px var(--color-ouro-forte),
-      0 0 28px rgb(246 195 68 / 0.85);
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+@keyframes subir-reacao {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -10px) scale(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -110px) scale(1);
   }
 }
 @keyframes girar {
@@ -351,20 +406,50 @@ input[type='number']::-webkit-inner-spin-button {
     transform: rotate(360deg);
   }
 }
+@keyframes brilho-manilha {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgb(242 193 78 / 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgb(242 193 78 / 0.75));
+  }
+}
+@keyframes vez {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(229 36 59 / 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgb(229 36 59 / 0);
+  }
+}
 .animar-surgir {
-  animation: surgir 0.35s ease both;
+  animation: surgir 0.32s ease both;
 }
 .animar-carta {
-  animation: carta-entra 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  animation: carta-entra 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+.animar-dar {
+  animation: dar-carta 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 }
 .animar-pulso {
   animation: pulso 1.2s ease-in-out infinite;
 }
 .animar-grito {
-  animation: grito 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  animation: grito 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+.animar-tremer {
+  animation: tremer 0.4s ease both;
 }
 .animar-girar {
   animation: girar 0.9s linear infinite;
+}
+.animar-manilha {
+  animation: brilho-manilha 2s ease-in-out infinite;
+}
+.animar-vez {
+  animation: vez 1.4s ease-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

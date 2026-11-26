@@ -11,7 +11,7 @@ import { site } from '../config/site.js'
 function ItemSala({ s }) {
   const andamento = s.status === 'andamento'
   return (
-    <Link to={`/sala/${s.id}`} className="cartao group flex flex-col p-5 transition-colors hover:border-ouro/50">
+    <Link to={`/sala/${s.id}`} className="cartao group flex flex-col p-5 transition-colors hover:border-marca/50">
       <div className="flex items-center gap-2">
         <span className="selo">{VARIANTES[s.variante].curto}</span>
         <span className="selo">
@@ -20,7 +20,7 @@ function ItemSala({ s }) {
         </span>
         {andamento && <span className="selo ml-auto bg-truco/15 text-truco">Em andamento</span>}
       </div>
-      <p className="titulo mt-3 truncate text-xl group-hover:text-ouro">{s.nome}</p>
+      <p className="titulo mt-3 truncate text-xl group-hover:text-marca-forte">{s.nome}</p>
       <p className="text-xs text-apagado">criada por {s.criador}</p>
       <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
@@ -35,7 +35,7 @@ function ItemSala({ s }) {
       <div className="mt-4 flex flex-wrap gap-1.5">
         {s.percentuais.map((p, i) => (
           <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-fundo/70 px-2 py-1 text-xs">
-            <Medal size={12} className={i === 0 ? 'text-ouro' : 'text-suave'} /> {i + 1}º {p}%
+            <Medal size={12} className={i === 0 ? 'text-marca-forte' : 'text-suave'} /> {i + 1}º {p}%
           </span>
         ))}
       </div>
@@ -49,7 +49,7 @@ function ItemSala({ s }) {
           </span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-painel-3">
-          <div className="h-full rounded-full bg-gradient-to-r from-ouro-escuro to-ouro" style={{ width: `${(s.inscritos / s.total) * 100}%` }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-marca-escura to-marca" style={{ width: `${(s.inscritos / s.total) * 100}%` }} />
         </div>
       </div>
     </Link>
@@ -71,7 +71,7 @@ export default function Salas() {
             Campeonatos montados pelos próprios jogadores: quantas duplas quiserem, inscrição definida por quem cria e prêmio para quantas posições escolherem.
           </p>
         </div>
-        <Link to={usuario ? '/salas/nova' : '/entrar?voltar=/salas/nova'} className="btn btn-ouro btn-grande">
+        <Link to={usuario ? '/salas/nova' : '/entrar?voltar=/salas/nova'} className="btn btn-primario btn-grande">
           <Plus size={20} /> Criar sala
         </Link>
       </div>
@@ -92,7 +92,7 @@ export default function Salas() {
         ) : lista.length === 0 ? (
           <div className="cartao">
             <Vazio icone={Trophy} titulo="Nenhuma sala aqui ainda" texto="Crie uma sala, mande o link no grupo da turma e deixe a disputa começar.">
-              <Link to={usuario ? '/salas/nova' : '/entrar?voltar=/salas/nova'} className="btn btn-ouro">
+              <Link to={usuario ? '/salas/nova' : '/entrar?voltar=/salas/nova'} className="btn btn-primario">
                 Criar a primeira sala
               </Link>
             </Vazio>
